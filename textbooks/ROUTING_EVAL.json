@@ -1,0 +1,17 @@
+{
+  "$comment": "Routing smoke-test for the RAG layer. Each case is a realistic agent query + the target(s) it should route to. tools/_audit_routing.py scores every book/doc by overlap with the query and PASSES if an expected target lands in the top 3. As you add books, add a case per new topic so routing stays honest. Targets: 'book_NN' or a reference_doc id (lowercase).",
+  "version": "0.1",
+  "pass_rule": "expected target in top-3 scored candidates",
+  "cases": [
+    { "query": "how do I write a new book and number its sections", "expect": ["book_00"] },
+    { "query": "what is the section id grammar and the deep-dive letter convention", "expect": ["book_00"] },
+    { "query": "what does this term mean, I need a definition", "expect": ["glossary"] },
+    { "query": "which architectural decision should I make here, weigh the trade-offs", "expect": ["decision_trees"] },
+    { "query": "my system is slow and flaky, what's the diagnosis", "expect": ["symptoms", "anti_patterns"] },
+    { "query": "common mistakes and failure modes to avoid", "expect": ["anti_patterns"] },
+    { "query": "what's the milestone build order from zero", "expect": ["starter_kit"] },
+    { "query": "recipe for a multi-step task across the books", "expect": ["workflows"] },
+    { "query": "named technique pattern vocabulary", "expect": ["patterns"] },
+    { "query": "where is topic Y covered in the books", "expect": ["index"] }
+  ]
+}

@@ -1,0 +1,66 @@
+# CI — &lt;PROJECT_NAME&gt;
+# TEMPLATE: fill in the build / test / lint / gate commands from PROJECT_CONVENTIONS.md.
+# These jobs are the merge gate — they encode the definition_of_done gates that can run in CI.
+# Replace each `echo "TODO …"` placeholder with the real command, and the setup step with your toolchain's.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    name: build & test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]   # trim to the platforms you actually ship
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      # --- Toolchain setup: replace with your stack's setup action ---
+      - name: Set up toolchain
+        run: echo "TODO: set up the toolchain (see PROJECT_CONVENTIONS.md > Stack)"
+
+      # --- Build (PROJECT_CONVENTIONS.md > Build & Test > Build) ---
+      - name: Build
+        run: echo "TODO: build command"
+
+      # --- Test (PROJECT_CONVENTIONS.md > Build & Test > Test) ---
+      - name: Test
+        run: echo "TODO: test command"
+
+      # --- The headless / operability gate (blocks merge). See validate_headless_mode. ---
+      # Drop this job if the project has no run loop.
+      - name: Headless smoke
+        run: echo "TODO: headless gate command (e.g. run N steps with no window/device)"
+
+  lint:
+    name: format & lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up toolchain
+        run: echo "TODO: set up the toolchain"
+      - name: Format check
+        run: echo "TODO: format --check command"
+      - name: Lint
+        run: echo "TODO: lint command (warnings as errors)"
+
+  # --- Optional: keep the knowledge library honest on every push that touches it ---
+  library-audits:
+    name: library audits
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.x" }
+      - name: Audit textbooks (refs / routing / links)
+        working-directory: textbooks
+        env: { PYTHONIOENCODING: utf-8, PYTHONUTF8: "1" }
+        run: |
+          python tools/_gen_sections.py
+          python tools/_audit_refs.py
+          python tools/_audit_routing.py
+          python tools/_audit_links.py

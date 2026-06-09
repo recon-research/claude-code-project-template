@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$comment": "Machine index for the RAG library. Skeleton/template state: one example book + the reference-doc set. Fill books[], topics, and counts during onboarding (see LIBRARY_SEED.md). Keep valid JSON; counts must match reality; coverage_gaps must be honest.",
+  "version": "0.1",
+  "series_title": "<DOMAIN> — A Knowledge Library",
+  "last_updated": "2026-06-09",
+  "total_books": 1,
+  "total_volumes": 1,
+  "system_name": "<EXAMPLE_SYSTEM>",
+  "section_index": { "path": "SECTIONS.json", "purpose": "Every heading's id/title/line. Resolve and verify any 'Book NN §X' without opening the book. Regenerate with tools/_gen_sections.py." },
+  "primary_assumptions": {
+    "language": "<fill during onboarding>",
+    "key_tools": "<fill during onboarding>",
+    "platforms": "<fill during onboarding>",
+    "note": "Unless the project says otherwise, the library assumes these. Architectural patterns transfer across stacks; specific APIs do not."
+  },
+  "intended_uses": [
+    "Study path: a human reads the books to learn the domain.",
+    "RAG reference: an agent consults the library while building, citing exact sections."
+  ],
+  "volumes": [
+    { "number": 1, "name": "<Volume 1 name — set during onboarding>", "books": [0] }
+  ],
+  "books": [
+    {
+      "id": "book_00",
+      "number": 0,
+      "title": "The Book Template (How To Write A Book In This Library)",
+      "path": "books/00_TEMPLATE.md",
+      "volume": 1,
+      "topics": ["template", "authoring", "conventions", "section ids", "citations"],
+      "key_concepts": ["section-id grammar", "deep-dive letter convention", "the book arc", "citation discipline", "write a new book"],
+      "summary": "The book template: how to write a new book in this library — the section-id grammar (## N. / ### N.M / ## N{Letter}.), the standard arc (TL;DR to foundations to architecture to implementation to frontier to agent-integration to exercises), and citation discipline. Copy it to author a real book."
+    }
+  ],
+  "reference_docs": [
+    { "id": "index", "path": "reference/INDEX.md", "topics": ["index", "lookup", "where covered", "topical"], "summary": "Back-of-book topical index: find where any topic is covered, by Book NN and section." },
+    { "id": "glossary", "path": "reference/GLOSSARY.md", "topics": ["glossary", "definitions", "terms", "vocabulary"], "summary": "Alphabetized term definitions, each pinned to the book(s) that cover it." },
+    { "id": "anti_patterns", "path": "reference/ANTI_PATTERNS.md", "topics": ["anti-patterns", "failure modes", "mistakes", "pitfalls"], "summary": "Cataloged failure modes — symptom, diagnosis, fix, and the books — the common mistakes to avoid." },
+    { "id": "decision_trees", "path": "reference/DECISION_TREES.md", "topics": ["decisions", "architectural forks", "choices", "trade-offs"], "summary": "Recurring architectural decisions as flowcharts with trade-offs; numbered D1, D2, and mirrored by the project's decision log." },
+    { "id": "symptoms", "path": "reference/SYMPTOMS.md", "topics": ["symptoms", "slow", "wrong", "flaky", "broken", "diagnosis"], "summary": "Symptom to diagnosis lookup keyed on plain vocabulary (X is slow / wrong / flaky / broken) routing to anti-patterns and sections." },
+    { "id": "patterns", "path": "reference/PATTERNS.md", "topics": ["patterns", "techniques", "named patterns", "vocabulary"], "summary": "Named recurring techniques — the shared vocabulary of the domain." },
+    { "id": "workflows", "path": "reference/WORKFLOWS.md", "topics": ["workflows", "recipes", "how-to", "multi-step tasks"], "summary": "Recipe-style multi-book task guides for composite operations." },
+    { "id": "starter_kit", "path": "reference/STARTER_KIT.md", "topics": ["starter kit", "milestones", "build order", "roadmap", "exit criteria"], "summary": "Milestone-driven path from zero to a shipped result, with exit criteria; the build order the ROADMAP mirrors." }
+  ],
+  "skills": [
+    { "path": "../.claude/skills/onboard.md", "triggers": ["onboard", "welcome back", "let's continue"], "description": "Resume a session: read Status + ROADMAP + open issues, pick up the resume point." },
+    { "path": "../.claude/skills/prepare_compaction.md", "triggers": ["prepare for compaction", "checkpoint", "wrap up"], "description": "Checkpoint before context runs out: rewrite Status, update docs, file followups, push." },
+    { "path": "../.claude/skills/build_library.md", "triggers": ["build the library", "write the textbooks", "grow the library"], "description": "Drive LIBRARY_SEED.md to author/extend the textbook/RAG library and keep the audits green." },
+    { "path": "../.claude/skills/configure_project.md", "triggers": ["configure project", "set up skills"], "description": "Inspect the repo and fill PROJECT_CONVENTIONS.md." },
+    { "path": "../.claude/skills/plan_work.md", "triggers": ["plan", "design", "architect"], "description": "Library-grounded implementation plan; the planning front-end." },
+    { "path": "../.claude/skills/review_against_library.md", "triggers": ["review against the library", "audit this design"], "description": "Conformance audit of a design/diff vs the library, cited Must-fix/Consider." },
+    { "path": "../.claude/skills/adversarial_review.md", "triggers": ["adversarial review", "red-team", "review before merge"], "description": "Multi-lens independent review before merge; fans out reviewers to falsify claims." },
+    { "path": "../.claude/skills/definition_of_done.md", "triggers": ["is this done", "run the gates", "definition of done"], "description": "Run the full verification gate with per-gate evidence." },
+    { "path": "../.claude/skills/build_and_test.md", "triggers": ["build", "run tests"], "description": "Full build + test cycle using PROJECT_CONVENTIONS commands." },
+    { "path": "../.claude/skills/add_test.md", "triggers": ["add test", "test for"], "description": "Add unit/integration/property/golden tests." },
+    { "path": "../.claude/skills/profile_subsystem.md", "triggers": ["profile", "find slow"], "description": "Capture and analyze a profile for a named subsystem." },
+    { "path": "../.claude/skills/optimize_loop.md", "triggers": ["optimize", "speed up"], "description": "Profile-driven optimization of a hot path." },
+    { "path": "../.claude/skills/generate_content.md", "triggers": ["generate", "create content with LLM"], "description": "Agentic LLM content-generation pipeline with validation." },
+    { "path": "../.claude/skills/add_telemetry_event.md", "triggers": ["add telemetry", "log event"], "description": "Add a telemetry event with schema + sampling." },
+    { "path": "../.claude/skills/add_agent_tool.md", "triggers": ["add MCP tool", "add agent tool"], "description": "Add a typed, validated, permission-filtered MCP tool." },
+    { "path": "../.claude/skills/snapshot_restore_test.md", "triggers": ["snapshot test", "rollback test"], "description": "Round-trip snapshot/restore test for any state-owning subsystem." },
+    { "path": "../.claude/skills/validate_headless_mode.md", "triggers": ["validate headless", "headless CI"], "description": "CI gate: initializes/ticks/shuts down with no window/device/human." },
+    { "path": "../.claude/skills/track_followups.md", "triggers": ["track followups", "file the deferred work"], "description": "Ensure deferred work lives in the tracker, not only in chat." }
+  ],
+  "rag_hints": {
+    "for_authoring_a_new_book": ["book_00"],
+    "for_term_definitions": ["glossary"],
+    "for_architectural_decisions": ["decision_trees"],
+    "for_debugging_a_symptom": ["symptoms", "anti_patterns"],
+    "for_build_order_and_milestones": ["starter_kit"],
+    "for_multi_step_recipes": ["workflows"],
+    "for_where_a_topic_lives": ["index"]
+  },
+  "topic_to_books": {
+    "book template": ["book_00"],
+    "authoring": ["book_00"],
+    "section ids": ["book_00"],
+    "conventions": ["book_00"],
+    "definitions": ["glossary"],
+    "glossary": ["glossary"],
+    "index": ["index"],
+    "anti-patterns": ["anti_patterns"],
+    "failure modes": ["anti_patterns"],
+    "decisions": ["decision_trees"],
+    "architectural forks": ["decision_trees"],
+    "symptoms": ["symptoms"],
+    "patterns": ["patterns"],
+    "workflows": ["workflows"],
+    "recipes": ["workflows"],
+    "milestones": ["starter_kit"],
+    "starter kit": ["starter_kit"]
+  },
+  "coverage_gaps": {
+    "description": "Topics the library does NOT cover or covers only partially. Check here FIRST when asked about something hard to locate, and say so honestly rather than fabricate. Fill this in as the library grows.",
+    "gaps": [
+      {
+        "topic": "the entire <DOMAIN> body of knowledge",
+        "status": "missing",
+        "nearest": "none yet — this is a freshly templated library; only the book template (book_00) exists",
+        "external": "to be filled during onboarding"
+      }
+    ]
+  }
+}

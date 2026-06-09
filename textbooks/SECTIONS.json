@@ -1,0 +1,72 @@
+{
+ "generated_from": "MANIFEST.json",
+ "books": {
+  "0": {
+   "path": "books/00_TEMPLATE.md",
+   "title": "The Book Template (How To Write A Book In This Library)",
+   "section_count": 10,
+   "sections": [
+    {
+     "id": "1",
+     "title": "TL;DR",
+     "line": 5,
+     "level": 2
+    },
+    {
+     "id": "2",
+     "title": "Conceptual Foundations",
+     "line": 9,
+     "level": 2
+    },
+    {
+     "id": "2.1",
+     "title": "A Subsection",
+     "line": 13,
+     "level": 3
+    },
+    {
+     "id": "2B",
+     "title": "Deep Dive — The Letter Convention (how to add depth later)",
+     "line": 17,
+     "level": 2
+    },
+    {
+     "id": "3",
+     "title": "Architecture & Design",
+     "line": 21,
+     "level": 2
+    },
+    {
+     "id": "4",
+     "title": "Implementation",
+     "line": 25,
+     "level": 2
+    },
+    {
+     "id": "5",
+     "title": "Bleeding Edge",
+     "line": 29,
+     "level": 2
+    },
+    {
+     "id": "6",
+     "title": "Gaps & Opportunities",
+     "line": 33,
+     "level": 2
+    },
+    {
+     "id": "7",
+     "title": "AI & Claude Code Integration",
+     "line": 37,
+     "level": 2
+    },
+    {
+     "id": "8",
+     "title": "Exercises & Further Reading",
+     "line": 41,
+     "level": 2
+    }
+   ]
+  }
+ }
+}

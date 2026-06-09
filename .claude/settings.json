@@ -1,0 +1,20 @@
+{
+  "$comment": "Shared, committed Claude Code settings for this project. Pre-approves common safe, read-only operations so the agent doesn't prompt on every one — extend it as patterns emerge (or run the fewer-permission-prompts skill). Machine-specific / personal grants go in settings.local.json (gitignored), not here.",
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(python tools/_gen_sections.py)",
+      "Bash(python tools/_audit_refs.py)",
+      "Bash(python tools/_audit_routing.py)",
+      "Bash(python tools/_audit_links.py)"
+    ]
+  }
+}
