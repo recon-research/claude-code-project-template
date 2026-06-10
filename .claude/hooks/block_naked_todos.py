@@ -13,7 +13,19 @@
 # a hygiene hook must never wedge the loop — CI still gates.
 # Note: `git commit -a` stages at commit time, so this sees only what was
 # staged beforehand — stage-then-commit is the convention anyway.
-import json, re, subprocess, sys
+import json, os, re, subprocess, sys
+
+def chdir_repo_root():
+    # Hook cwd is wherever Claude Code was launched; pathspecs below assume repo root.
+    root = os.environ.get("CLAUDE_PROJECT_DIR")
+    if not (root and os.path.isdir(root)):
+        try:
+            root = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True,
+                                  text=True, timeout=10).stdout.strip()
+        except Exception:
+            root = ""
+    if root and os.path.isdir(root):
+        os.chdir(root)
 
 EXEMPT = [":!*.md", ":!.github", ":!textbooks", ":!scripts/preflight.sh", ":!scripts/preflight.ps1"]
 TICKETED = re.compile(r"(?i)\b(todo|fixme)\(#\d+\)")
@@ -29,6 +41,7 @@ def main():
     command = str(payload.get("tool_input", {}).get("command", ""))
     if not re.match(r"\s*git\s+commit\b", command):
         return 0
+    chdir_repo_root()
     try:
         diff = subprocess.run(
             ["git", "diff", "--cached", "--"] + ["."] + EXEMPT,

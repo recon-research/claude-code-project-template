@@ -11,7 +11,7 @@
 #
 # Contract: exit 0 always; stdout = injected context; on any error print
 # nothing (a banner must never wedge a session).
-import re, subprocess, sys
+import os, re, subprocess, sys
 
 def run(args, timeout=8):
     try:
@@ -22,6 +22,12 @@ def run(args, timeout=8):
         return ""
 
 def main():
+    # Hook cwd is wherever Claude Code was launched; CLAUDE.md lives at repo root.
+    root = os.environ.get("CLAUDE_PROJECT_DIR")
+    if not (root and os.path.isdir(root)):
+        root = run(["git", "rev-parse", "--show-toplevel"])
+    if root and os.path.isdir(root):
+        os.chdir(root)
     lines = []
     try:
         text = open("CLAUDE.md", encoding="utf-8", errors="replace").read()

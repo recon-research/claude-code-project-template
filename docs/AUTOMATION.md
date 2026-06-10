@@ -1,53 +1,26 @@
-# AUTOMATION.md — The Operator Console (attended setup, once)
+# AUTOMATION.md — The Operator Console
 
-Everything on this page extends the autopilot loop but **requires the human once** — either because it edits permission machinery (`.claude/settings.json` is owner-approved by policy; the agent must not change it without your explicit, in-your-own-words instruction) or because it needs credentials/UI. Each item is tiered like a research note. Lazy-read: nothing here loads into sessions.
+The automation surfaces beyond the core loop. §1–2 are **already wired** in this template; §3–5 **require the human once** (credentials/UI). Standing rule either way: `.claude/settings.json` is permission machinery — the agent only changes it on your explicit, in-your-own-words instruction. Each item is tiered like a research note. Lazy-read: nothing here loads into sessions.
 
-## 1. Hooks — zero-token mechanical gates `[production-proven]`
+## 1. Hooks — zero-token mechanical gates `[production-proven]` *(wired)*
 
-Two hook scripts ship in [`.claude/hooks/`](../.claude/hooks/) (inert until wired; each file's header documents its contract; docs: https://code.claude.com/docs/en/hooks, accessed 2026-06-10):
+Two hook scripts in [`.claude/hooks/`](../.claude/hooks/), wired in [`settings.json`](../.claude/settings.json) (each file's header documents its contract; both **fail open** — any internal error allows, so a hygiene hook can never wedge the loop; docs: https://code.claude.com/docs/en/hooks, accessed 2026-06-10):
 
 | Hook | Event | What it does |
 |---|---|---|
 | [`block_naked_todos.py`](../.claude/hooks/block_naked_todos.py) | `PreToolUse` (Bash) | Blocks `git commit` while the staged diff adds a naked TODO/FIXME — local CI parity at the moment of commit, zero tokens. Blocking hooks take precedence over the allowlist, so the pre-approved `git commit:*` can't bypass it. |
 | [`session_start_banner.py`](../.claude/hooks/session_start_banner.py) | `SessionStart` (startup\|resume + compact) | Injects a 1–3 line banner: Status-anchor staleness (As-of sha vs HEAD) + the open decision queue. The `compact` matcher re-grounds the agent right after a surprise compaction. ~100 tokens. |
 
-Don't add a **blocking** PreCompact hook — wedging compaction at full context is worse than anything it could check.
+Hook config is snapshotted at session start — edits take effect next session (or after review via `/hooks`). Don't add a **blocking** PreCompact hook — wedging compaction at full context is worse than anything it could check.
 
-## 2. The proposed `settings.json` delta (owner-applied)
+## 2. The `settings.json` posture *(wired — owner-approved 2026-06-10)*
 
-Merge this into `.claude/settings.json` by hand, or paste it to the agent **with explicit instructions in your own words** (permission-machinery edits are deliberately not self-serve):
+What the committed file carries, and why:
 
-```jsonc
-{
-  // ADD to permissions.allow (preflight is the most frequent loop command):
-  //   "Bash(scripts/preflight.sh:*)", "Bash(bash scripts/preflight.sh:*)",
-  //   "Bash(python research/tools/_audit_research.py:*)"
-  // (The textbook-audit entries already work — the scripts are cwd-independent.)
-
-  // ADD permissions.deny — narrow tripwires for the policy-forbidden forms
-  // (prefix grammar can't catch every flag position; policy + branch
-  // protection with "include administrators" are the real guards):
-  //   "Bash(git push --force:*)", "Bash(git push -f:*)", "Bash(gh pr merge --admin:*)"
-
-  "hooks": {
-    "PreToolUse": [
-      { "matcher": "Bash",
-        "hooks": [ { "type": "command", "command": "python .claude/hooks/block_naked_todos.py" } ] }
-    ],
-    "SessionStart": [
-      { "matcher": "startup|resume",
-        "hooks": [ { "type": "command", "command": "python .claude/hooks/session_start_banner.py" } ] },
-      { "matcher": "compact",
-        "hooks": [ { "type": "command", "command": "python .claude/hooks/session_start_banner.py" } ] }
-    ]
-  }
-
-  // OPTIONAL: "fallbackModel" — tried in order when the primary is
-  // unavailable (changelog v2.1.166) — keeps an overnight run alive through
-  // a model-availability blip. Verify the current key shape in the docs
-  // before setting. [published]
-}
-```
+- **allow** — the full autopilot loop: read-only git/gh, tracker writes, branch/commit/push, PR create+merge, `scripts/preflight.sh` (the most frequent loop command), and the library/research audits (cwd-independent, so both root-relative and in-dir spellings work).
+- **deny** — tripwires for the policy-forbidden forms: `git push --force` / `-f`, `gh pr merge --admin`. The prefix grammar can't catch every flag position (e.g. `gh pr merge 12 --admin` slips the prefix), so these are seatbelts, not the guard — the guard is branch protection with **"include administrators"** (§5) plus the written policy (`PROJECT_CONVENTIONS.md` › Merge policy).
+- **hooks** — §1, via `$CLAUDE_PROJECT_DIR` so they work from any launch directory.
+- **Optional, not set:** `fallbackModel` — fallback model(s) tried when the primary is unavailable (changelog v2.1.166) — would keep an overnight run alive through an availability blip. Verify the current key shape in the docs before adding. `[published]`
 
 ## 3. `@claude` GitHub Actions — answer decision issues from your phone `[production-proven]`
 

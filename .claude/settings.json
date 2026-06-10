@@ -1,5 +1,5 @@
 {
-  "$comment": "Shared Claude Code settings. This allowlist exists for unattended autopilot runs: a permission prompt mid-run can stall the agent for hours, so the whole ticket->branch->implement->PR->merge loop is pre-approved (read-only git/gh, tracker writes, branch/commit/push, PR create+merge, the library audits). Explicitly approved by the project owner. It deliberately omits gh repo edit/delete, gh api, and arbitrary shell. Trim entries to re-insert manual gates (e.g. remove 'gh pr merge' to approve merges yourself); force-pushes are forbidden by policy (CLAUDE.md) though the rule grammar cannot exclude them. Machine-specific grants belong in settings.local.json (gitignored).",
+  "$comment": "Shared Claude Code settings. The allowlist exists for unattended autopilot runs: a permission prompt mid-run can stall the agent for hours, so the whole ticket->branch->implement->PR->merge loop is pre-approved (read-only git/gh, tracker writes, branch/commit/push, PR create+merge, preflight, the library/research audits). Explicitly approved by the project owner. It deliberately omits gh repo edit/delete, gh api, and arbitrary shell. Trim entries to re-insert manual gates (e.g. remove 'gh pr merge' to approve merges yourself). The deny rules are tripwires for the policy-forbidden forms (PROJECT_CONVENTIONS.md > Merge policy); the prefix grammar cannot catch every flag position, so branch protection with 'include administrators' is the real guard. Hooks (both fail-open; see docs/AUTOMATION.md): block_naked_todos denies `git commit` while the staged diff adds a naked TODO/FIXME; session_start_banner injects Status-staleness + the open decision queue at session start and after compaction. Machine-specific grants belong in settings.local.json (gitignored).",
   "permissions": {
     "allow": [
       "Bash(git status:*)",
@@ -42,7 +42,39 @@
       "Bash(python tools/_gen_sections.py:*)",
       "Bash(python tools/_audit:*)",
       "Bash(python textbooks/tools/_gen_sections.py:*)",
-      "Bash(python textbooks/tools/_audit:*)"
+      "Bash(python textbooks/tools/_audit:*)",
+      "Bash(python research/tools/_audit_research.py:*)",
+      "Bash(scripts/preflight.sh:*)",
+      "Bash(bash scripts/preflight.sh:*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(gh pr merge --admin:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/block_naked_todos.py\"" }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          { "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_start_banner.py\"" }
+        ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          { "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_start_banner.py\"" }
+        ]
+      }
     ]
   }
 }
