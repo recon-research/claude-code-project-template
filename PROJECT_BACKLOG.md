@@ -1,6 +1,6 @@
-# PROJECT_BACKLOG.md — Cross-Session Continuity (a convention, not a tracker)
+# PROJECT_BACKLOG.md — Pre-Repo Continuity Only (delete once the tracker exists)
 
-> Copy this to your **project root** (next to `PROJECT_CONVENTIONS.md`). It is a *convention*, **not** an issue tracker. For real backlog management at scale, use GitHub Issues / Linear / Jira (or the harness's task tools). This file exists only to carry **milestone state across sessions** — so an agent picking the work back up knows what's done, what's next, and what's blocked — keyed to the `STARTER_KIT.md` milestone roadmap.
+> This file carries work items across sessions **only during the window before the GitHub repo exists** (intake → library building). **The moment `origin` is live, migrate every item here to tracker issues and delete this file** — `onboard` (Mode A) and `prepare_compaction` both enforce that. Two backlogs is a staleness machine; the tracker is the only durable one (truth order: git/CI > tracker > docs > chat).
 
 ## How this file is used
 

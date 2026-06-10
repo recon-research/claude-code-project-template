@@ -1,6 +1,6 @@
 ---
 name: adversarial_review
-description: Red-team a substantial or error-prone change with several independent, READ-ONLY review agents run in parallel — each given a distinct lens and an explicit mandate to FALSIFY the change's correctness claims (not confirm them) — then reconcile severity-tagged findings, apply the must-fix set in a coordinated (non-trampling) pass, and ticket the rest. Use at the end of a feature, before merging (or before closing an epic). Triggers: "adversarial review", "red-team this", "review before merge", "multi-lens review", "audit this change". Complements /code-review (generic bugs) and review_against_library (library conformance); this targets correctness, test-oracle integrity, and invariant conformance.
+description: Red-team a substantial change before merge with parallel READ-ONLY reviewer subagents — distinct lenses, an explicit mandate to FALSIFY the change's claims — then one coordinated fix pass and tickets for the rest. Use at end-of-feature / pre-merge / epic-close. Say "adversarial review", "red-team this", "review before merge", "multi-lens review". Complements /code-review (generic bugs) and review_against_library (conformance).
 ---
 
 # Adversarial Review (Parallel, Multi-Lens)
@@ -14,7 +14,7 @@ The one rule that makes the parallel fan-out safe — **so the reviewers never t
 - **Review phase = strictly read-only.** Every reviewer *analyzes* the diff and *returns findings*. **No reviewer edits the working tree.** That is precisely *why* they can run concurrently without trampling — there is nothing to trample, because nobody writes. A reviewer that wants to "just fix it inline" is a setup bug; stop it.
 - **Fix phase = a single coordinated writer.** Apply the must-fix set *after* the fan-out, from one place. By default **serially** in the working tree (one writer, no conflicts). Parallelize fixes only when they touch **disjoint files**, and then **isolate each in its own git worktree/branch** (e.g. the Workflow tool's `isolation: 'worktree'`, or a branch per fix) and merge back — never two fix agents writing the same tree at once.
 
-Keep the two phases strictly separated: reviewers find; one coordinated pass fixes.
+Keep the two phases strictly separated: reviewers find; one coordinated pass fixes. (This shape is also the token-efficient one: each reviewer burns its own subagent context; the orchestrator holds only the findings tables.)
 
 ## When to run
 

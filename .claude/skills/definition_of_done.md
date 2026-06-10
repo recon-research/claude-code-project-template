@@ -20,7 +20,8 @@ Run each gate that applies; record **PASS / FAIL / N/A** with evidence:
 7. **Determinism** *(if the system requires reproducibility)* — preserved where the library requires it (fixed-step simulation, seeded generation + recorded inputs, replay); otherwise N/A.
 8. **Performance** — any performance claim is backed by a profile (`profile_subsystem`), not a guess.
 9. **Milestone** — if this work closes a milestone, the ROADMAP / STARTER_KIT milestone exit criterion is met.
-10. **Backlog** — file completion / move the item to **Done** in the project's tracker (via `track_followups`) with the date and the milestone exit-criterion it met (only once every gate above is PASS).
+10. **Backlog & deferrals** — completion is reflected in the tracker (the PR closes its slice issue); every deferred finding has a ticket (`track_followups`); and the diff introduces **no naked TODO/FIXME** — only `TODO(#NN)` with a filed issue. Quick check (should print nothing): `git diff origin/main...HEAD -- ':!*.md' ':!textbooks' | grep -E '^\+.*\b(TODO|FIXME)\b' | grep -vE '\(#[0-9]+\)'`.
+11. **Merge-time checkpoint** — the `CLAUDE.md` Status line and the ROADMAP slice state reflect this merge (the standing checkpoint-at-every-merge rule).
 
 ## Output
 

@@ -21,3 +21,4 @@ for f in glob.glob("**/*.md", recursive=True):
                 broken.append((f.replace("\\", "/"), i, tgt))
 print(f"Markdown links checked: {checked} | broken: {len(broken)}")
 for b in broken: print(f"  BROKEN  {b[0]}:{b[1]}  ->  {b[2]}")
+raise SystemExit(1 if broken else 0)

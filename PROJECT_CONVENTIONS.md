@@ -36,4 +36,11 @@ The drop-in skills describe *what* to do; the project-specific *where* and *how*
 ## Agent / Tooling
 - **MCP server name(s)**: &lt;the MCP servers the agent/project exposes, if any — read by `add_agent_tool`&gt;
 - **CI + gate command**: &lt;the CI system and the merge-gating command — read by `definition_of_done` / `validate_headless_mode`&gt;
-- **Issue tracker**: &lt;e.g. GitHub Issues on `<org>/<repo>` — the live backlog `track_followups` writes to&gt;
+
+## Tracker & Hygiene
+- **Issue tracker**: &lt;e.g. GitHub Issues on `<org>/<repo>`&gt; — the live backlog; **defer = file now** (`track_followups`).
+- **Labels**: `slice` (a unit of roadmap work) · `decision` (fork awaiting the human) · `followup` (deferred work) · `idea` · `debt` · `bug` · `blocked`. Created once at repo setup (`onboard` Mode A); the issue templates apply them.
+- **Branch naming**: `slice/<issue#>-<slug>` · **PR title**: `M<n> <slice>: <imperative summary> (closes #<issue>)`.
+- **TODO convention**: a TODO entering code must reference a filed ticket — `TODO(#NN): …`. Naked `TODO`/`FIXME` fails `definition_of_done` and the CI hygiene job.
+- **Merge policy**: &lt;squash / merge-commit — pick one&gt;; PRs require green CI; `main` is never pushed directly.
+- **Decision flow**: fork → `decision` issue (template) → human picks (async) → recorded as `D-NN` in `docs/ARCHITECTURE.md` Appendix A → issue closed. Reversible forks may proceed provisionally per `CLAUDE.md` §3.

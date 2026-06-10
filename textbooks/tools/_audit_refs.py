@@ -57,3 +57,4 @@ for p in (sorted(glob.glob("*.md")) + sorted(glob.glob("books/*.md")) + sorted(g
 print(f"Book refs checked: {bn_checked} | misses: {len(bmiss)} | doc misses: {len(dmiss)}")
 for x in bmiss: print("  BOOK", x)
 for x in dmiss: print("  DOC ", x)
+raise SystemExit(1 if (bmiss or dmiss) else 0)

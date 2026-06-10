@@ -18,7 +18,7 @@ This skill assumes the library is reachable (the project's `CLAUDE.md` points at
    - Resolve the exact sections with `SECTIONS.json` (`id` / `title` / `line`) — do **not** read whole books.
    - If the task involves an architectural fork, open the matching `DECISION_TREES.md` node first — many choices are already settled there with trade-offs.
 
-3. **Read narrowly.** Read only the routed sections (architecture + implementation). Capture the library's recommended option **and** the documented alternatives it compares.
+3. **Read narrowly.** Read only the routed sections (architecture + implementation). Capture the library's recommended option **and** the documented alternatives it compares. If exploration must be broad, delegate it to read-only subagents and keep only their conclusions in context.
 
 4. **Pre-mortem.** Pull the relevant `ANTI_PATTERNS.md` and `SYMPTOMS.md` entries for this area *before* planning. List the known failure modes the plan must design around.
 
@@ -30,10 +30,11 @@ This skill assumes the library is reachable (the project's `CLAUDE.md` points at
    - **Alternatives considered** — the other options the library compares, each with the trade-off that decides between them.
    - **Failure modes to avoid** — from ANTI_PATTERNS / SYMPTOMS, with the guard for each.
    - **Implementation steps** — ordered; map each step to the execution skill that performs it (the project's `add_*` / domain skills) and the book section it follows.
+   - **Staged route** — structure the steps as small, *independently verifiable* slices, each testable on its own and load-bearing toward the full solution (no throwaway scaffolding without an explicit decision). When an easier-to-test intermediate exists, schedule it as a **stepping stone to the ambitious end-state — never as a scope cut**; name what each slice proves.
    - **Verification plan** — the definition-of-done gates: `build_and_test`, `add_test`; `validate_headless_mode` / `snapshot_restore_test` for systems that own state or have a run loop; `profile_subsystem` before any performance claim.
    - **Honest leverage** — flag which steps are 5–20× (boilerplate / standard work-from-spec) vs ~1× (architecture, perf-without-profile, subtle concurrency, integration debugging) so the human knows where to engage.
-   - **Open decisions for the human** — the calls that are genuinely theirs.
-   - **Backlog** — file the approved work in the project's tracker (via `track_followups`), linked to the ROADMAP / STARTER_KIT milestone it advances, so the plan survives across sessions.
+   - **Open decisions for the human** — the calls that are genuinely theirs, each classified **blocking** (hard to reverse — park the slice if unanswered) or **provisional-able** (reversible — name the default you'll proceed with, per the `CLAUDE.md` §3 protocol).
+   - **Backlog** — file each planned slice as a `slice` issue (template, acceptance criteria included) linked to the ROADMAP milestone it advances, so the plan survives compaction and parked slices stay pickable.
 
 7. **Cite, don't assert.** Every recommendation carries a `Book NN §X` (or DOC) citation, verifiable via `SECTIONS.json`. Where the project is on a different stack than the library's example, port the idea, not the function signature.
 

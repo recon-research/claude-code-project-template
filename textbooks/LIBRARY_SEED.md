@@ -112,7 +112,7 @@ Four small, domain-agnostic scripts keep the library honest. They live in `tools
 - **`_audit_routing.py`** → scores each `ROUTING_EVAL.json` query against the routing data and confirms the expected target ranks top-3. Catches routing **gaps** and **mis-routes** that the citation check can't see.
 - **`_audit_links.py`** → validates every relative markdown link `[text](file.md)` resolves on disk. The citation checker does **not** check markdown links, so this is what keeps navigation (and any later file reorganization) safe. Target: **0 broken**.
 
-A library that passes all four is internally consistent. Make passing them a release gate.
+A library that passes all four is internally consistent. Make passing them a release gate — they exit non-zero on failure, so CI can enforce that gate mechanically.
 
 ---
 
@@ -326,6 +326,7 @@ for p in (sorted(glob.glob("*.md")) + sorted(glob.glob("books/*.md")) + sorted(g
 print(f"Book refs checked: {bn_checked} | misses: {len(bmiss)} | doc misses: {len(dmiss)}")
 for x in bmiss: print("  BOOK", x)
 for x in dmiss: print("  DOC ", x)
+raise SystemExit(1 if (bmiss or dmiss) else 0)
 ```
 
 ### 9.3 `_audit_routing.py`
@@ -370,6 +371,7 @@ for case in EV["cases"]:
     else: fails.append((q,expect,[(t,score(q,t)) for t in ranked[:3]]))
 print(f"Routing eval: {passed}/{len(EV['cases'])} passed")
 for q,e,t in fails: print(f"\nQ: {q}\n  expected {e}\n  got {t}")
+raise SystemExit(1 if fails else 0)
 ```
 
 ### 9.4 `_audit_links.py`
@@ -397,6 +399,7 @@ for f in glob.glob("**/*.md", recursive=True):
                 broken.append((f.replace("\\", "/"), i, tgt))
 print(f"Markdown links checked: {checked} | broken: {len(broken)}")
 for b in broken: print(f"  BROKEN  {b[0]}:{b[1]}  ->  {b[2]}")
+raise SystemExit(1 if broken else 0)
 ```
 
 ---

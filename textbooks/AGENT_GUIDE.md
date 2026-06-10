@@ -18,6 +18,8 @@ Do **not** read whole books; your context is finite. Load artifacts in this orde
 6. **[../.claude/skills/](../.claude/skills/)** — the atomic operations (§3). **[reference/WORKFLOWS.md](reference/WORKFLOWS.md)** — multi-book recipes.
 7. **[reference/ANTI_PATTERNS.md](reference/ANTI_PATTERNS.md)** + **[reference/SYMPTOMS.md](reference/SYMPTOMS.md)** — the relevant entries *before* coding, and again when something breaks.
 
+**Context discipline:** delegate broad, exploratory reads to read-only subagents and keep only their conclusions; reserve the main context for the current diff and the decisions. Grep the indexes; never load them whole.
+
 ---
 
 ## 1. The build loop (per feature or subsystem)
@@ -33,7 +35,7 @@ e. IMPLEMENT  → Follow the book's architecture; adapt APIs to the project's ac
 f. ATOMIZE    → Use the matching skill for the mechanical part (the add_*/ project skills)
 g. VERIFY     → build_and_test; add_test; definition_of_done for the full gate
 h. PROFILE    → Optimize only against data (profile_subsystem). Never on a hunch (§5)
-i. RECORD     → Note any new decision, gap, or deviation in the project's docs / decision log
+i. RECORD     → Update docs/decision log; file every deferral as a ticket NOW (defer = file now)
 ```
 
 The loop isn't strictly linear — `g` failing sends you back to `c`/`e`. But never let code reach `g` without having done `c`.

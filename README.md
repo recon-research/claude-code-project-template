@@ -36,10 +36,10 @@ It's the generalized, blank-slate version of a proven setup: a domain "textbook"
 | [`_intake/`](_intake/) | Drop-zone for the Claude Chat planning docs; onboarding reads it, then it's archived. |
 | [`docs/`](docs/) | The operating manual: `ARCHITECTURE.md` (shape + invariants + decision log), `ROADMAP.md` (milestones). |
 | [`PROJECT_CONVENTIONS.md`](PROJECT_CONVENTIONS.md) | Per-project paths / commands / stack. Every skill reads it. |
-| [`PROJECT_BACKLOG.md`](PROJECT_BACKLOG.md) | Lightweight cross-session continuity (Now/Next/Blocked/Done). Defers to GitHub Issues at scale. |
+| [`PROJECT_BACKLOG.md`](PROJECT_BACKLOG.md) | **Pre-repo continuity only** — migrated to issues and deleted once the GitHub repo exists. |
 | [`textbooks/`](textbooks/) | The vendored RAG library: `LIBRARY_SEED.md` (how to build it), `MANIFEST`/`SECTIONS`/`ROUTING_EVAL` (machine indexes), `books/` `reference/` `vision/` `tools/`. |
 | [`.claude/skills/`](.claude/skills/) | The reusable skill set (see [its README](.claude/skills/README.md)). |
-| [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | CI gate (build / test / lint / definition-of-done) that blocks merge. |
+| [`.github/`](.github/) | CI gates (build / test / lint / **library audits** / **TODO hygiene**) + issue templates (`slice` / `decision` / `followup`) and the PR template that keep the tracker uniform and cold-readable. |
 
 ## The two layers, and why they're separate
 

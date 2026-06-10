@@ -38,4 +38,4 @@ python tools/_audit_routing.py     # all ROUTING_EVAL cases pass
 python tools/_audit_links.py       # 0 broken markdown links
 ```
 
-A library that passes all four is internally consistent. Make passing them a release gate. See [LIBRARY_SEED.md](LIBRARY_SEED.md) §4 and §8.
+A library that passes all four is internally consistent. The scripts **exit non-zero on failure**, so CI enforces them as a real merge gate (see [`../.github/workflows/ci.yml`](../.github/workflows/ci.yml)). See [LIBRARY_SEED.md](LIBRARY_SEED.md) §4 and §8.

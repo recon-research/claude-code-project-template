@@ -38,3 +38,4 @@ for case in EV["cases"]:
     else: fails.append((q,expect,[(t,score(q,t)) for t in ranked[:3]]))
 print(f"Routing eval: {passed}/{len(EV['cases'])} passed")
 for q,e,t in fails: print(f"\nQ: {q}\n  expected {e}\n  got {t}")
+raise SystemExit(1 if fails else 0)

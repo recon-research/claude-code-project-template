@@ -1,7 +1,8 @@
-# CI — &lt;PROJECT_NAME&gt;
+# CI — <PROJECT_NAME>
 # TEMPLATE: fill in the build / test / lint / gate commands from PROJECT_CONVENTIONS.md.
 # These jobs are the merge gate — they encode the definition_of_done gates that can run in CI.
 # Replace each `echo "TODO …"` placeholder with the real command, and the setup step with your toolchain's.
+# The library-audits and hygiene jobs are real and enforced from day one.
 name: CI
 
 on:
@@ -32,7 +33,7 @@ jobs:
         run: echo "TODO: test command"
 
       # --- The headless / operability gate (blocks merge). See validate_headless_mode. ---
-      # Drop this job if the project has no run loop.
+      # Drop this step if the project has no run loop.
       - name: Headless smoke
         run: echo "TODO: headless gate command (e.g. run N steps with no window/device)"
 
@@ -48,7 +49,9 @@ jobs:
       - name: Lint
         run: echo "TODO: lint command (warnings as errors)"
 
-  # --- Optional: keep the knowledge library honest on every push that touches it ---
+  # Keeps the knowledge library honest on every push. The audit scripts exit
+  # non-zero on any unresolved citation / failed routing case / broken link,
+  # so this job genuinely blocks merge — it is not decorative.
   library-audits:
     name: library audits
     runs-on: ubuntu-latest
@@ -64,3 +67,26 @@ jobs:
           python tools/_audit_refs.py
           python tools/_audit_routing.py
           python tools/_audit_links.py
+
+  # Tracker hygiene: added code must not contain a naked TODO/FIXME — every
+  # deferral carries a filed ticket, written as TODO(#NN). Docs (*.md),
+  # .github/ and textbooks/ are exempt (they *talk about* TODOs).
+  hygiene:
+    name: hygiene (no naked TODOs)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: No naked TODO/FIXME in added lines
+        run: |
+          git fetch origin "${{ github.base_ref }}" --quiet
+          naked=$(git diff "origin/${{ github.base_ref }}...HEAD" -- . ':!*.md' ':!.github' ':!textbooks' \
+            | grep -E '^\+' | grep -vE '^\+\+\+' | grep -E '\b(TODO|FIXME)\b' | grep -vE '\(#[0-9]+\)' || true)
+          if [ -n "$naked" ]; then
+            echo "$naked"
+            echo "::error::Naked TODO/FIXME in the diff — file a ticket first and annotate as TODO(#NN). See PROJECT_CONVENTIONS.md, Tracker & Hygiene."
+            exit 1
+          fi
+          echo "No naked TODOs."
