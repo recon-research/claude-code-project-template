@@ -10,6 +10,7 @@ The drop-in skills describe *what* to do; the project-specific *where* and *how*
 - **Primary language(s)**: &lt;fill in&gt;
 
 ## Build & Test
+- **Preflight (every merge-blocking gate, locally, in CI order)**: `scripts/preflight.sh` / `scripts\preflight.ps1` — run before **every** push; a clean preflight means CI should be green. The scripts mirror `.github/workflows/ci.yml` by construction (change one → change the other); `configure_project` fills their TODO stages from the commands below. Flags: `--quick`/`-Quick` (static gates only) · `--skip-smoke`/`-SkipSmoke`.
 - **Build**: `<build command>`
 - **Profiling build**: `<how to build with the profiler enabled>`
 - **Run**: `<run command, incl. any headless / no-window flag>`
@@ -44,4 +45,11 @@ The drop-in skills describe *what* to do; the project-specific *where* and *how*
 - **Branch naming**: `slice/<issue#>-<slug>` · **PR title**: `M<n> <slice>: <imperative summary> (closes #<issue>)`.
 - **TODO convention**: a TODO entering code must reference a filed ticket — `TODO(#NN): …`. Naked `TODO`/`FIXME` fails `definition_of_done` and the CI hygiene job.
 - **Merge policy**: &lt;squash / merge-commit — pick one&gt;; PRs require green CI; `main` is never pushed directly.
+- **PR / commit mechanics**: create PRs with `gh pr create --body-file <tempfile>` (UTF-8) — **never inline `--body`** (Windows PowerShell 5.1 splits the body at embedded double quotes; body-file is portable everywhere). Multiline commit messages likewise go through a file or stdin: `git commit -F -` with a here-doc (PowerShell here-string quoting mangles git args).
 - **Decision flow**: fork → `decision` issue (template) → human picks (async) → recorded as `D-NN` in `docs/ARCHITECTURE.md` Appendix A → issue closed. Reversible forks may proceed provisionally per `CLAUDE.md` §3.
+
+## Shell gotchas (optional — keep if any contributor/agent runs Windows PowerShell 5.1; else delete)
+- No `&&` / `||` pipeline chains (parser error) — sequence with `;` or `if ($?) { … }`.
+- Don't pipe native commands (git, build tools) through `2>&1` — PS 5.1 wraps each stderr line in an ErrorRecord and poisons `$?` even on exit 0.
+- `gh pr create` / `gh issue create`: always `--body-file` (see PR / commit mechanics above).
+- Keep `.ps1` output strings ASCII — PS 5.1 reads un-BOM'd scripts as ANSI (non-ASCII becomes mojibake).

@@ -41,6 +41,7 @@ It's the generalized, blank-slate version of a proven setup: a domain "textbook"
 | [`textbooks/`](textbooks/) | The vendored RAG library: `LIBRARY_SEED.md` (how to build it), `MANIFEST`/`SECTIONS`/`ROUTING_EVAL` (machine indexes), `books/` `reference/` `vision/` `tools/`. |
 | [`research/`](research/) | The frontier layer: sourced+tiered survey notes, pre-registered experiments (`EXP-NN`), paper-style reports (`RR-NN`), and its own audit. Settled findings graduate into `textbooks/`. |
 | [`.claude/skills/`](.claude/skills/) | The reusable skill set (see [its README](.claude/skills/README.md)). |
+| [`scripts/`](scripts/) | `preflight.{sh,ps1}` — every merge-blocking gate locally, in CI order (mirrors the CI workflow; `configure_project` fills the TODO stages). Run before every push. |
 | [`.github/`](.github/) | CI gates (build / test / lint / **library audits** / **TODO hygiene**) + issue templates (`slice` / `decision` / `followup`) and the PR template that keep the tracker uniform and cold-readable. |
 
 ## The two layers, and why they're separate

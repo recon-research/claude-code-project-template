@@ -9,6 +9,8 @@ Runs the full verification gate from AGENT_GUIDE §2 against a subsystem or chan
 
 ## Procedure
 
+**Mechanical first:** `scripts/preflight.sh` (or `scripts\preflight.ps1`) runs the CI-mirrored gate set (format, lint, build, test, run-loop smoke) locally in CI order — run it, attach its PASS line as the evidence for gates 1–2 (and 5 where it applies), then assess the judgment gates.
+
 Run each gate that applies; record **PASS / FAIL / N/A** with evidence:
 
 1. **Builds clean** — `build_and_test` passes; no new warnings the project treats as errors.
