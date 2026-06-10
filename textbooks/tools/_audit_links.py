@@ -1,4 +1,5 @@
 import re, glob, os
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # cwd-independent: data lives beside tools/
 LINK = re.compile(r'\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)')
 CODE_SPAN = re.compile(r'`[^`]*`')   # inline code — an illustrative [text](x) inside it is not a real link
 SKIP = ('http://', 'https://', 'mailto:', '#')

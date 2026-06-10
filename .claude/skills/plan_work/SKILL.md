@@ -33,9 +33,9 @@ This skill assumes the library is reachable (the project's `CLAUDE.md` points at
    - **Implementation steps** — ordered; map each step to the execution skill that performs it (the project's `add_*` / domain skills) and the book section it follows.
    - **Staged route** — structure the steps as small, *independently verifiable* slices, each testable on its own and load-bearing toward the full solution (no throwaway scaffolding without an explicit decision). When an easier-to-test intermediate exists, schedule it as a **stepping stone to the ambitious end-state — never as a scope cut**; name what each slice proves.
    - **Verification plan** — the definition-of-done gates: `build_and_test`, `add_test`; `validate_headless_mode` / `snapshot_restore_test` for systems that own state or have a run loop; `profile_subsystem` before any performance claim.
-   - **Honest leverage** — flag which steps are 5–20× (boilerplate / standard work-from-spec) vs ~1× (architecture, perf-without-profile, subtle concurrency, integration debugging) so the human knows where to engage.
+   - **Honest leverage** — flag which steps are high-multiplier vs ~1× per `textbooks/AGENT_GUIDE.md` §5 (the canonical leverage list — don't restate it) so the human knows where to engage.
    - **Open decisions for the human** — the calls that are genuinely theirs, each classified **blocking** (hard to reverse — park the slice if unanswered) or **provisional-able** (reversible — name the default you'll proceed with, per the `CLAUDE.md` §3 protocol).
-   - **Backlog** — file each planned slice as a `slice` issue (template, acceptance criteria included) linked to the ROADMAP milestone it advances, so the plan survives compaction and parked slices stay pickable.
+   - **Backlog** — file each planned slice as a `slice` issue (template, acceptance criteria included) linked to the ROADMAP milestone it advances, so the plan survives compaction and parked slices stay pickable. No `origin` yet? Append each slice to `PROJECT_BACKLOG.md` › Next instead — the pre-repo parking lot.
 
 7. **Cite, don't assert.** Every recommendation carries a `Book NN §X` (or DOC) citation, verifiable via `SECTIONS.json`. Where the project is on a different stack than the library's example, port the idea, not the function signature.
 

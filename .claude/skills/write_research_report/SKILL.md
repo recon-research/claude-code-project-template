@@ -5,7 +5,7 @@ description: Synthesize completed experiments into a paper-style report artifact
 
 # Write a Research Report (RR-NN)
 
-The publishable artifact: readable by a human cold, auditable by an agent, and reproducible from the repo. Every claim maps to a figure/table/number; every frontier source is a **real fetched link**; limitations are stated plainly. Built from [the template](../../research/reports/00_TEMPLATE.md).
+The publishable artifact: readable by a human cold, auditable by an agent, and reproducible from the repo. Every claim maps to a figure/table/number; every frontier source is a **real fetched link**; limitations are stated plainly. Built from [the template](../../../research/reports/00_TEMPLATE.md).
 
 ## Procedure
 

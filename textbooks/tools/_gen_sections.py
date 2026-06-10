@@ -1,4 +1,5 @@
 import re, json, os
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # cwd-independent: data lives beside tools/
 M = json.load(open("MANIFEST.json", encoding="utf-8"))
 by_num = {b["number"]: b for b in M["books"]}
 HEAD = re.compile(r'^(#{2,5})\s+(.*?)\s*$')

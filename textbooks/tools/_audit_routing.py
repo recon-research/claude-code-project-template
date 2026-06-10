@@ -1,4 +1,5 @@
-import json, re
+import json, re, os, glob
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # cwd-independent: data lives beside tools/
 M = json.load(open("MANIFEST.json", encoding="utf-8"))
 EV = json.load(open("ROUTING_EVAL.json", encoding="utf-8"))
 STOP=set("with that this into from your you should what does mean give make build using like want need have them and the for are can how why when which who your our its was just then than also more most some any all into onto over under via per each both these those an to of in on is it do i me my we us be as at or if so no not new use used uses".split())
@@ -38,4 +39,14 @@ for case in EV["cases"]:
     else: fails.append((q,expect,[(t,score(q,t)) for t in ranked[:3]]))
 print(f"Routing eval: {passed}/{len(EV['cases'])} passed")
 for q,e,t in fails: print(f"\nQ: {q}\n  expected {e}\n  got {t}")
-raise SystemExit(1 if fails else 0)
+# --- skills catalog: MANIFEST skills[] is the single catalog; it must match disk ---
+# (Skipped when no ../.claude/skills exists — e.g. a standalone library checkout.)
+sk_fails=[]
+sk_listed={str(s.get("path","")).replace("\\","/") for s in M.get("skills",[])}
+sk_disk={p.replace("\\","/") for p in glob.glob("../.claude/skills/*/SKILL.md")}
+if sk_disk:
+    sk_fails += [f"MANIFEST skills[] path missing on disk -> {p}" for p in sorted(sk_listed) if p.startswith("../.claude/") and not os.path.exists(p)]
+    sk_fails += [f"skill on disk not in MANIFEST skills[] -> {p}" for p in sorted(sk_disk - sk_listed)]
+for x in sk_fails: print("  SKILLS", x)
+print(f"Skills catalog: {len(sk_listed)} listed, {len(sk_disk)} on disk, {len(sk_fails)} mismatch(es)")
+raise SystemExit(1 if (fails or sk_fails) else 0)

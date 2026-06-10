@@ -22,6 +22,7 @@ The failure mode this kills: the agent says "we'll get to X later," doesn't writ
 3. **Write it to be actioned cold.** A future session has none of this context: *what* + *where* (file paths), *why deferred*, the originating PR/issue #, any grounding (`Book NN §X`), and what "done" looks like.
 4. **Cross-link both ways.** The origin (PR body, parent issue, code `TODO(#NN)`) names the ticket; the ticket names its origin.
 5. If it changes near-term plans, point the ROADMAP's **Next** at the issue # — link, don't duplicate the body.
+6. **If `gh` fails transiently** (rate limit, network): retry once. Still failing → append the item verbatim under a `## Unfiled` heading in `PROJECT_BACKLOG.md` (recreate the file if it was retired) and keep working — `onboard` step 3 and `prepare_compaction` step 4 drain Unfiled into real issues. The success signal for this skill is an **issue number**; no number = not filed.
 
 ## Output
 
@@ -36,7 +37,8 @@ The failure mode this kills: the agent says "we'll get to X later," doesn't writ
 ## Don't
 
 - **Don't say "I'll get to it later" without a ticket number in the same breath** — that sentence is the bug this skill exists to fix.
-- Don't park work in `PROJECT_BACKLOG.md` once the repo exists — the tracker is authoritative; the backlog file is pre-repo only.
+- Don't treat a failed `gh issue create` as filed — no issue number, no ticket; use the `## Unfiled` fallback (step 6) and drain it at the next checkpoint.
+- Don't park work in `PROJECT_BACKLOG.md` once the repo exists (the `## Unfiled` outage fallback is the one exception, drained at the next onboard/compaction) — the tracker is authoritative.
 - Don't file vague tickets ("improve X") — name the file, the symptom, and the finish line.
 - Don't file noise: trivial items get done inline now or dropped, not ticketed. Don't duplicate — search first.
 - Don't defer a Critical/High correctness finding to a ticket to dodge fixing it — tickets are for *non-blocking* work.

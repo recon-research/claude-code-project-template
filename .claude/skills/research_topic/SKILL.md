@@ -5,7 +5,7 @@ description: Survey a bleeding-edge topic online into a sourced, tiered research
 
 # Research a Frontier Topic
 
-Produce (or refresh) a survey note in [`research/notes/`](../../research/notes/00_TEMPLATE.md) per the [research discipline](../../research/README.md). The defining rule: **fetched, or not cited** — your training knowledge is stale by definition on frontier topics, and a hallucinated citation poisons every plan that later cites the note.
+Produce (or refresh) a survey note in [`research/notes/`](../../../research/notes/00_TEMPLATE.md) per the [research discipline](../../../research/README.md). The defining rule: **fetched, or not cited** — your training knowledge is stale by definition on frontier topics, and a hallucinated citation poisons every plan that later cites the note.
 
 ## Procedure
 
@@ -13,7 +13,7 @@ Produce (or refresh) a survey note in [`research/notes/`](../../research/notes/0
 2. **Check what exists:** `research/MANIFEST.json` (`topic_to_notes`) for a prior note — if one exists and is fresh, extend it; if stale (>~180 days), this run is the re-verify. Check the textbook routing too (`MANIFEST.json` → the book's Bleeding Edge section) so the note supplements rather than duplicates curriculum.
 3. **Sweep the web broadly.** Multiple query formulations; prefer **primary sources** — arXiv abstract pages, DOIs, official docs/release notes, conference proceedings, the project's own repo — over blog summaries. If the harness provides a deep-research skill, use it for the fan-out; otherwise fan out **read-only subagents** (one per subtopic) with WebSearch/WebFetch, each returning claims **with their URLs**. Token discipline: subagents read pages; you keep conclusions.
 4. **Fetch every source you will cite.** Open the actual page (WebFetch) before citing it — including any citation a deep-research pass or subagent handed you (verify before trusting). Record the URL + accessed date + the key numbers *while reading*. Paywalled? Cite the abstract page and tier accordingly — never pretend to have read what you couldn't.
-5. **Write the note** from [`notes/00_TEMPLATE.md`](../../research/notes/00_TEMPLATE.md): framing → **State of the art** (each claim line: numbers, `[tier]`, `(source: <URL>, accessed YYYY-MM-DD)`) → **feasibility path** against this project's real stack and invariants → **candidate experiments** → **Watch** list. Set `> reviewed:` to today.
+5. **Write the note** from [`notes/00_TEMPLATE.md`](../../../research/notes/00_TEMPLATE.md): framing → **State of the art** (each claim line: numbers, `[tier]`, `(source: <URL>, accessed YYYY-MM-DD)`) → **feasibility path** against this project's real stack and invariants → **candidate experiments** → **Watch** list. Set `> reviewed:` to today.
 6. **Route + validate:** add the `notes[]` entry and `topic_to_notes` route in `research/MANIFEST.json`; run `python tools/_audit_research.py` from `research/` (green or fix). Ship via the normal PR flow.
 7. **File the follow-ups:** each candidate experiment worth running becomes a ticket (`track_followups`); if the survey resolves or reframes a pending decision, update the `decision` issue.
 

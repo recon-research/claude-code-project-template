@@ -9,7 +9,12 @@
 # kills the "fix one lint, push, wait for CI to find the next one" loop.
 # (Windows-native equivalent: scripts/preflight.ps1.)
 #
-# Flags: --quick (static gates only: format + lint) · --skip-smoke (skip the run-loop gate)
+# The library-audit / research-audit / todo-hygiene stages are REAL from day
+# one (they mirror ci.yml's enforced jobs); the format/lint/build/test/smoke
+# stages are TODO placeholders until configure_project fills them — a PASS on
+# a placeholder stage verifies nothing.
+#
+# Flags: --quick (skip build/test/smoke; audits + hygiene always run) · --skip-smoke (skip the run-loop gate)
 set -u
 cd "$(dirname "$0")/.."
 
@@ -50,9 +55,35 @@ if [ "$QUICK" -eq 0 ]; then
     fi
 fi
 
+# --- Real-from-day-one gates (mirror ci.yml's library-audits / research-audits / hygiene jobs) ---
+library_audits() {
+    python textbooks/tools/_gen_sections.py || return 1
+    # The COMMITTED index is what agents grep to verify citations — regen must be a no-op.
+    git diff --quiet -- textbooks/SECTIONS.json \
+        || { echo "SECTIONS.json is stale — commit the regenerated index"; return 1; }
+    python textbooks/tools/_audit_refs.py || return 1
+    python textbooks/tools/_audit_routing.py || return 1
+    python textbooks/tools/_audit_links.py
+}
+stage "library audits" library_audits
+
+stage "research audit" python research/tools/_audit_research.py
+
+todo_hygiene() {
+    # Mirrors ci.yml's hygiene job (same pathspecs, same regex — change both together).
+    git rev-parse --verify -q origin/main >/dev/null 2>&1 \
+        || { echo "(no origin/main yet — skipped)"; return 0; }
+    local naked
+    naked=$(git diff origin/main...HEAD -- . ':!*.md' ':!.github' ':!textbooks' \
+        ':!scripts/preflight.sh' ':!scripts/preflight.ps1' \
+        | grep -E '^\+' | grep -vE '^\+\+\+' \
+        | sed -E 's/(todo|fixme)\(#[0-9]+\)//gI' | grep -iE '\b(todo|fixme)\b' || true)
+    [ -z "$naked" ] || { echo "$naked"; echo "naked TODO/FIXME — file a ticket and write TODO(#NN)"; return 1; }
+}
+stage "todo hygiene (vs origin/main)" todo_hygiene
+
 if [ "$FAILED" -ne 0 ]; then
     echo "PREFLIGHT: FAIL — do not push"
     exit 1
 fi
 echo "PREFLIGHT: PASS — safe to push"
-echo "(template note: stages above are TODO placeholders until configure_project fills them)"

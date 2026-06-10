@@ -1,6 +1,6 @@
 # &lt;DOMAIN&gt; — Knowledge Library
 
-A structured, self-validating RAG knowledge library for **&lt;DOMAIN&gt;**, with the example system named **&lt;EXAMPLE_SYSTEM&gt;**. It is the reference the project's Claude Code agent consults and cites while building. *(Currently a blank template — only the book template exists. Build it with [`build_library`](../.claude/skills/build_library.md), driven by [LIBRARY_SEED.md](LIBRARY_SEED.md).)*
+A structured, self-validating RAG knowledge library for **&lt;DOMAIN&gt;**, with the example system named **&lt;EXAMPLE_SYSTEM&gt;**. It is the reference the project's Claude Code agent consults and cites while building. *(Currently a blank template — only the book template exists. Build it with [`build_library`](../.claude/skills/build_library/SKILL.md), driven by [LIBRARY_SEED.md](LIBRARY_SEED.md).)*
 
 ## What's here
 

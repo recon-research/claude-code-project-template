@@ -9,7 +9,7 @@ The durable memory is the docs + the issue tracker, not the chat. This skill flu
 
 ## Procedure
 
-1. **Rewrite the Status block** in [`CLAUDE.md`](../../CLAUDE.md) to reflect reality, and **stamp it**: `As of: <today> · <main short-sha>`.
+1. **Rewrite the Status block** in [`CLAUDE.md`](../../../CLAUDE.md) to reflect reality, and **stamp it**: `As of: <today> · <main short-sha>`.
    - Phase · milestone · CI state of main.
    - **Done** (closed this session, by PR #), **In progress** (+ issue/PR #), **Next** (1–3 slices by issue #).
    - **Decisions awaiting the human** — must exactly mirror `gh issue list --label decision`; mark any proceeding provisionally.
@@ -19,10 +19,11 @@ The durable memory is the docs + the issue tracker, not the chat. This skill flu
    - every **In progress / Next** item ↔ an open issue;
    - the decision list ↔ `gh issue list --label decision`, exactly;
    - ROADMAP slice/milestone states match the above. Fix every mismatch **now** — docs are caches of the tracker.
-3. **Update the durable docs.** Reflect milestone progress in [`docs/ROADMAP.md`](../../docs/ROADMAP.md); record any decision made this session as `D-NN` in [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md) Appendix A. If a milestone closed, sanity-check the next milestone's slices against what was learned — re-plan via `plan_work` if stale; **plans are caches too**.
-4. **Sweep deferrals.** Run [`track_followups`](track_followups.md): anything deferred, promised, or ideated that lives only in chat becomes an issue (labels: `followup` / `idea` / `debt`). This should find little if "defer = file now" was followed mid-session — treat every catch here as a near-miss.
+3. **Update the durable docs.** Reflect milestone progress in [`docs/ROADMAP.md`](../../../docs/ROADMAP.md); record any decision made this session as `D-NN` in [`docs/ARCHITECTURE.md`](../../../docs/ARCHITECTURE.md) Appendix A. If a milestone closed, sanity-check the next milestone's slices against what was learned — re-plan via `plan_work` if stale; **plans are caches too**.
+4. **Sweep deferrals.** Run [`track_followups`](../track_followups/SKILL.md): anything deferred, promised, or ideated that lives only in chat becomes an issue (labels: `followup` / `idea` / `debt`); drain any `## Unfiled` section in `PROJECT_BACKLOG.md` (the gh-outage parking lot) into real issues. This should find little if "defer = file now" was followed mid-session — treat every catch here as a near-miss.
 5. **Retire the scratch backlog.** If `origin` exists and `PROJECT_BACKLOG.md` is still present, migrate its items to issues and delete the file (it's pre-repo continuity only).
-6. **Leave the tree clean and pushed.** Commit merged work; push; note CI state in Status (a red CI is noted, never hidden). If `textbooks/` was touched, regenerate `SECTIONS.json` and run the audits (they exit non-zero — fix before declaring the checkpoint done).
+6. **Leave the tree clean and pushed.** Commit merged work; land the doc-only checkpoint commit via the **checkpoint path** in `PROJECT_CONVENTIONS.md` › Merge policy (protected main rejects direct pushes — don't discover that at session end); note CI state in Status (a red CI is noted, never hidden). If `textbooks/` was touched, regenerate `SECTIONS.json` and run the audits (they exit non-zero — fix before declaring the checkpoint done).
+7. **Then compact with focus.** If the session continues past this checkpoint, prefer `/compact <one-line focus — the Resume point>` over a bare compaction: the summary keeps what you name.
 
 ## Verification
 

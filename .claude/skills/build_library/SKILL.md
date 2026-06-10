@@ -5,7 +5,7 @@ description: Author or extend the project's textbook/RAG knowledge library in te
 
 # Build / Extend The Library
 
-The library (`textbooks/`) is the domain knowledge the agent later consults and cites. It must stay **routable, verifiable, and honest**. This skill drives [`textbooks/LIBRARY_SEED.md`](../../textbooks/LIBRARY_SEED.md) — read it; it is the authoritative instruction set.
+The library (`textbooks/`) is the domain knowledge the agent later consults and cites. It must stay **routable, verifiable, and honest**. This skill drives [`textbooks/LIBRARY_SEED.md`](../../../textbooks/LIBRARY_SEED.md) — read it; it is the authoritative instruction set.
 
 ## Procedure
 

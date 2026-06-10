@@ -77,6 +77,9 @@ jobs:
         env: { PYTHONIOENCODING: utf-8, PYTHONUTF8: "1" }
         run: |
           python tools/_gen_sections.py
+          # The COMMITTED index is what agents grep to verify citations — a heading
+          # edit merged without regenerating it would poison every later lookup.
+          git diff --exit-code -- SECTIONS.json || { echo "::error::SECTIONS.json is stale — run tools/_gen_sections.py and commit the result."; exit 1; }
           python tools/_audit_refs.py
           python tools/_audit_routing.py
           python tools/_audit_links.py
@@ -98,6 +101,23 @@ jobs:
         env: { PYTHONIOENCODING: utf-8, PYTHONUTF8: "1" }
         run: python tools/_audit_research.py
 
+  # Skills load ONLY as .claude/skills/<name>/SKILL.md directories — a flat
+  # .md file in skills/ silently fails to load (the layer becomes inert docs).
+  skills-structure:
+    name: skills are directories
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: No flat skill files
+        run: |
+          flat=$(find .claude/skills -maxdepth 1 -name '*.md' ! -name 'README.md' 2>/dev/null || true)
+          if [ -n "$flat" ]; then
+            echo "$flat"
+            echo "::error::Flat skill file(s) under .claude/skills/ — Agent Skills load only from <name>/SKILL.md directories. git mv each to <name>/SKILL.md."
+            exit 1
+          fi
+          echo "Skills structure OK."
+
   # Tracker hygiene: added code must not contain a naked TODO/FIXME — every
   # deferral carries a filed ticket, written as TODO(#NN). Docs (*.md),
   # .github/ and textbooks/ are exempt (they *talk about* TODOs).
@@ -113,11 +133,17 @@ jobs:
         # scripts/preflight.{sh,ps1} are exempt while they are TODO-placeholder
         # templates; configure_project replaces their stage bodies with real
         # commands — drop the two exemptions then.
+        # The sed strips ticketed TODO(#NN)/FIXME(#NN) forms first, so EVERY
+        # remaining occurrence is naked — a `(#NN)` elsewhere on the line no
+        # longer whitewashes one. (sed+grep, not grep -P: PCRE dies on
+        # non-UTF-8 locales, e.g. git-bash on Windows.)
+        # Mirrored by the `todo hygiene` stage in scripts/preflight.{sh,ps1}.
         run: |
           git fetch origin "${{ github.base_ref }}" --quiet
           naked=$(git diff "origin/${{ github.base_ref }}...HEAD" -- . ':!*.md' ':!.github' ':!textbooks' \
             ':!scripts/preflight.sh' ':!scripts/preflight.ps1' \
-            | grep -E '^\+' | grep -vE '^\+\+\+' | grep -E '\b(TODO|FIXME)\b' | grep -vE '\(#[0-9]+\)' || true)
+            | grep -E '^\+' | grep -vE '^\+\+\+' \
+            | sed -E 's/(todo|fixme)\(#[0-9]+\)//gI' | grep -iE '\b(todo|fixme)\b' || true)
           if [ -n "$naked" ]; then
             echo "$naked"
             echo "::error::Naked TODO/FIXME in the diff — file a ticket first and annotate as TODO(#NN). See PROJECT_CONVENTIONS.md, Tracker & Hygiene."

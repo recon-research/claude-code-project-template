@@ -18,7 +18,7 @@ Reports and notes **ground `D-NN` decisions** exactly like book sections do — 
 ## The discipline (audited — these are not suggestions)
 
 1. **Fetched, or not cited.** Every present-tense claim carries `(source: <URL>, accessed YYYY-MM-DD)` **on the same line**. A model's training knowledge is stale by definition on frontier topics — claims come from pages actually fetched this session, never from recall. No consulted source → no claim.
-2. **Every claim is tiered**: `[production-proven]` (shipped in a real product) · `[published]` (peer-reviewed paper / official docs / release notes) · `[experimental]` (preprint, proposal, community project). Don't launder experimental into proven.
+2. **Every claim is tiered**: `[production-proven]` (shipped in a real product) · `[published]` (peer-reviewed paper / official docs / release notes) · `[experimental]` (preprint, proposal, community project). Don't launder experimental into proven. *(The tier tag is also the enforcement hook: the audit mechanically checks source + accessed-date on every tier-tagged line — an untagged claim escapes the gate, so tag everything that asserts.)*
 3. **Notes stale.** Every note carries `> reviewed: YYYY-MM-DD` and goes stale **~180 days** later: re-verify load-bearing claims (and bump the date) before planning against it. The audit warns on stale notes (`--strict-staleness` to fail).
 4. **Different trust models stay distinguishable.** Cite this layer as `research/notes/<file>.md` / `EXP-NN` / `RR-NN` — **never as a `Book NN §X`**. Plans, tickets, and PRs must show which library a claim came from.
 5. **Project-relative, not encyclopedic.** Every note ends with a feasibility path tied to this project's actual constraints, candidate experiments, and a Watch list (what to re-check, where, roughly when).
@@ -48,4 +48,4 @@ Run `python tools/_audit_research.py` from this directory (CI does, on every pus
 
 ## Authoring
 
-Use the skills — they encode the procedure: [`research_topic`](../.claude/skills/research_topic.md) (survey), [`run_experiment`](../.claude/skills/run_experiment.md) (test), [`write_research_report`](../.claude/skills/write_research_report.md) (publish). All three go through the normal ticket → branch → PR flow.
+Use the skills — they encode the procedure: [`research_topic`](../.claude/skills/research_topic/SKILL.md) (survey), [`run_experiment`](../.claude/skills/run_experiment/SKILL.md) (test), [`write_research_report`](../.claude/skills/write_research_report/SKILL.md) (publish). All three go through the normal ticket → branch → PR flow.

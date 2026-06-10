@@ -7,10 +7,15 @@
 # after a clean preflight is environmental (read the log, don't guess).
 # (POSIX equivalent: scripts/preflight.sh.)
 #
+# The library-audit / research-audit / todo-hygiene stages are REAL from day
+# one (they mirror ci.yml's enforced jobs); the format/lint/build/test/smoke
+# stages are TODO placeholders until configure_project fills them — a PASS on
+# a placeholder stage verifies nothing.
+#
 # Windows PowerShell 5.1 compatible (no &&, no ternary). Keep output strings
 # ASCII: PS 5.1 reads un-BOM'd .ps1 files as ANSI, so non-ASCII renders as mojibake.
 #
-# Flags: -Quick (static gates only: format + lint) · -SkipSmoke (skip the run-loop gate)
+# Flags: -Quick (skip build/test/smoke; audits + hygiene always run) · -SkipSmoke (skip the run-loop gate)
 [CmdletBinding()]
 param(
     [switch]$Quick,
@@ -27,11 +32,23 @@ function Invoke-Stage {
     if ($script:Failed) { return }
     Write-Host "==> $Name" -ForegroundColor Cyan
     $Watch.Restart()
-    & $Body
-    $code = $LASTEXITCODE
+    # Reset so a body that runs no native command can't inherit a stale exit
+    # code, and a body whose command fails to even start (typo'd tool) can't
+    # false-PASS: $? catches command-not-found, $LASTEXITCODE catches nonzero.
+    $global:LASTEXITCODE = 0
+    $ok = $true
+    try {
+        & $Body
+        if (-not $?) { $ok = $false }
+        if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) { $ok = $false }
+    }
+    catch {
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        $ok = $false
+    }
     $secs = [math]::Round($Watch.Elapsed.TotalSeconds, 1)
-    if ($null -ne $code -and $code -ne 0) {
-        Write-Host "FAIL  $Name (${secs}s, exit $code)" -ForegroundColor Red
+    if (-not $ok) {
+        Write-Host "FAIL  $Name (${secs}s)" -ForegroundColor Red
         $script:Failed = $true
     }
     else {
@@ -52,10 +69,38 @@ if (-not $Quick) {
     }
 }
 
+# --- Real-from-day-one gates (mirror ci.yml's library-audits / research-audits / hygiene jobs) ---
+Invoke-Stage 'library audits' {
+    python textbooks/tools/_gen_sections.py
+    if ($LASTEXITCODE -ne 0) { return }
+    # The COMMITTED index is what agents grep to verify citations - regen must be a no-op.
+    git diff --quiet -- textbooks/SECTIONS.json
+    if ($LASTEXITCODE -ne 0) { Write-Host 'SECTIONS.json is stale - commit the regenerated index'; return }
+    python textbooks/tools/_audit_refs.py
+    if ($LASTEXITCODE -ne 0) { return }
+    python textbooks/tools/_audit_routing.py
+    if ($LASTEXITCODE -ne 0) { return }
+    python textbooks/tools/_audit_links.py
+}
+
+Invoke-Stage 'research audit' { python research/tools/_audit_research.py }
+
+Invoke-Stage 'todo hygiene (vs origin/main)' {
+    # Mirrors ci.yml's hygiene job (same pathspecs, same regex - change both together).
+    $null = git rev-parse --verify -q origin/main
+    if ($LASTEXITCODE -ne 0) { $global:LASTEXITCODE = 0; Write-Host '(no origin/main yet - skipped)'; return }
+    $diffLines = git diff origin/main...HEAD -- . ':!*.md' ':!.github' ':!textbooks' ':!scripts/preflight.sh' ':!scripts/preflight.ps1'
+    $naked = @($diffLines | Where-Object { $_ -match '^\+' -and $_ -notmatch '^\+\+\+' -and $_ -match '(?i)\b(todo|fixme)\b(?!\(#\d+\))' })
+    if ($naked.Count -gt 0) {
+        $naked | ForEach-Object { Write-Host $_ }
+        Write-Host 'naked TODO/FIXME - file a ticket and write TODO(#NN)'
+        $global:LASTEXITCODE = 1
+    }
+}
+
 if ($script:Failed) {
     Write-Host 'PREFLIGHT: FAIL - do not push' -ForegroundColor Red
     exit 1
 }
 Write-Host 'PREFLIGHT: PASS - safe to push' -ForegroundColor Green
-Write-Host '(template note: stages above are TODO placeholders until configure_project fills them)'
 exit 0

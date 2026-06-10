@@ -17,7 +17,7 @@ Markdown, PDFs, text, images — whatever you have. No particular structure is r
 
 ## What onboarding does with it
 
-The [`onboard`](../.claude/skills/onboard.md) skill reads everything here and:
+The [`onboard`](../.claude/skills/onboard/SKILL.md) skill reads everything here and:
 
 1. Fills the [`CLAUDE.md`](../CLAUDE.md) **Status** block and the `<placeholders>`.
 2. Drafts [`docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md) (shape, invariants, the initial decision log) and [`docs/ROADMAP.md`](../docs/ROADMAP.md) (milestones `M0..`).

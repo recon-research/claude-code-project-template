@@ -9,7 +9,7 @@ Runs the full verification gate from AGENT_GUIDE §2 against a subsystem or chan
 
 ## Procedure
 
-**Mechanical first:** `scripts/preflight.sh` (or `scripts\preflight.ps1`) runs the CI-mirrored gate set (format, lint, build, test, run-loop smoke) locally in CI order — run it, attach its PASS line as the evidence for gates 1–2 (and 5 where it applies), then assess the judgment gates.
+**Mechanical first:** `scripts/preflight.sh` (or `scripts\preflight.ps1`) runs the CI-mirrored gate set — format, lint, build, test, run-loop smoke, library audits + SECTIONS freshness, research audit, todo hygiene — locally in CI order. Run it, attach its PASS line as the evidence for gates 1–2 (and 5 and 10's mechanical half where they apply), then assess the judgment gates.
 
 Run each gate that applies; record **PASS / FAIL / N/A** with evidence:
 
@@ -21,8 +21,8 @@ Run each gate that applies; record **PASS / FAIL / N/A** with evidence:
 6. **Anti-patterns** — the cataloged failure modes for this subsystem (ANTI_PATTERNS / SYMPTOMS) are explicitly avoided or guarded. For a substantial feature, confirm `adversarial_review`'s Must-fix findings are resolved — run it now if it wasn't already run earlier in the workflow; don't re-run a fan-out that already happened.
 7. **Determinism** *(if the system requires reproducibility)* — preserved where the library requires it (fixed-step simulation, seeded generation + recorded inputs, replay); otherwise N/A.
 8. **Performance** — any performance claim is backed by a profile (`profile_subsystem`), not a guess.
-9. **Milestone** — if this work closes a milestone, the ROADMAP / STARTER_KIT milestone exit criterion is met.
-10. **Backlog & deferrals** — completion is reflected in the tracker (the PR closes its slice issue); every deferred finding has a ticket (`track_followups`); and the diff introduces **no naked TODO/FIXME** — only `TODO(#NN)` with a filed issue. Quick check (should print nothing): `git diff origin/main...HEAD -- ':!*.md' ':!textbooks' | grep -E '^\+.*\b(TODO|FIXME)\b' | grep -vE '\(#[0-9]+\)'`.
+9. **Milestone** — if this work closes a milestone, the ROADMAP / STARTER_KIT milestone exit criterion is met — and the **next milestone is immediately planned**: run `plan_work` and file its slice issues before picking up new work (Status `Next` must never point at issue-less placeholders).
+10. **Backlog & deferrals** — completion is reflected in the tracker (the PR closes its slice issue; pre-`origin`, tick it off in `PROJECT_BACKLOG.md` instead); every deferred finding has a ticket (`track_followups`); and the diff introduces **no naked TODO/FIXME** — only `TODO(#NN)` with a filed issue. Mechanical check: the `todo hygiene` stage of `scripts/preflight.{sh,ps1}` (it mirrors the CI hygiene job exactly — same pathspecs, same regex; don't restate the pipeline here, run the stage).
 11. **Merge-time checkpoint** — the `CLAUDE.md` Status line and the ROADMAP slice state reflect this merge (the standing checkpoint-at-every-merge rule).
 
 ## Output

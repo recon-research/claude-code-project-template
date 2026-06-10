@@ -2,7 +2,7 @@
 
 This file tells Claude Code how to consult this textbook/RAG library while working on **&lt;PROJECT_NAME&gt;**. If your job is to *build* (not just answer questions), read [AGENT_GUIDE.md](AGENT_GUIDE.md) — it is the operating loop that ties the library, the skills, and the verification gates together.
 
-> **Still a blank library?** If `books/` only has the template and `MANIFEST.json` is a skeleton, the library hasn't been built yet. See [LIBRARY_SEED.md](LIBRARY_SEED.md) and run the [`build_library`](../.claude/skills/build_library.md) skill.
+> **Still a blank library?** If `books/` only has the template and `MANIFEST.json` is a skeleton, the library hasn't been built yet. See [LIBRARY_SEED.md](LIBRARY_SEED.md) and run the [`build_library`](../.claude/skills/build_library/SKILL.md) skill.
 
 ## What This Library Is
 
@@ -37,11 +37,11 @@ A structured, self-validating knowledge library for **&lt;DOMAIN&gt;**, with the
 Section references use `Book NN §M.N` format. To resolve or **verify** a `§` citation without opening the book, consult [SECTIONS.json](SECTIONS.json) — a machine index of every heading (`id`, `title`, `line`). **Grep it for the section you need; don't load it whole.** Verify every `§` citation against it before asserting one. Then read only the relevant sections — never whole books.
 
 ### Step 4 — Apply with judgment
-The library is opinionated; trade-offs are documented. Note where the actual project differs from `<EXAMPLE_SYSTEM>`'s defaults, acknowledge alternatives, and don't dogmatically apply a pattern that doesn't fit.
+The library is opinionated; trade-offs are documented. Stack adaptation and when to stop and ask the human are canonical in [AGENT_GUIDE.md](AGENT_GUIDE.md) §4–§5 — don't restate them, follow them.
 
 ## Default assumptions in the library
 
-Unless the project says otherwise, the library assumes: &lt;fill in the domain's baseline — language(s), key tools/formats/platforms — during onboarding&gt;. If the project's stack differs, the architectural patterns transfer; the specific APIs don't.
+Unless the project says otherwise, the library assumes: &lt;fill in the domain's baseline — language(s), key tools/formats/platforms — during onboarding&gt;. Project stack differs? AGENT_GUIDE §4.
 
 ## Cross-reference conventions
 
@@ -54,7 +54,7 @@ Before guessing, check `MANIFEST.json` `coverage_gaps` — each entry has a `sta
 
 ## Leverage honesty
 
-State expectations plainly. The agent's multiplier is high on boilerplate / refactor / tests / docs and standard work-from-spec; it is ~1× (the human's judgment) on novel architecture, performance tuning without profile data, and debugging subtle interactions. Set a realistic blended expectation, not a heroic one.
+Where the agent is high-multiplier vs ~1× (stop and ask): the canonical list is [AGENT_GUIDE.md](AGENT_GUIDE.md) §5. One list, one home — it had already drifted when it lived in three places.
 
 ## Style notes
 

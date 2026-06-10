@@ -59,7 +59,7 @@ A concrete end-to-end trace anchors the loop far better than abstract descriptio
 
 ## 2. Definition of done (the verification gate)
 
-A unit of work is **not done** until these hold — self-audit before telling the human a subsystem is complete (orchestrated by the [`definition_of_done`](../.claude/skills/definition_of_done.md) skill):
+A unit of work is **not done** until these hold — self-audit before telling the human a subsystem is complete (orchestrated by the [`definition_of_done`](../.claude/skills/definition_of_done/SKILL.md) skill):
 
 - [ ] Builds clean and `build_and_test` passes (no new warnings the project treats as errors).
 - [ ] Has tests appropriate to its kind (`add_test`: unit / integration / property / golden).
@@ -72,34 +72,9 @@ A unit of work is **not done** until these hold — self-audit before telling th
 
 ---
 
-## 3. The skills map (atomic operation → skill)
+## 3. The skills map
 
-These live in the project's `.claude/skills/` and read project paths/commands from `PROJECT_CONVENTIONS.md`, so the same skills work unmodified on any project.
-
-| You are… | Skill |
-|---|---|
-| **Onboarding / resuming** a session | `onboard` |
-| **Checkpointing** before context runs out | `prepare_compaction` |
-| **Building / extending** this library | `build_library` |
-| **Setting up** the skills in a project | `configure_project` |
-| **Planning / designing** a feature | `plan_work` |
-| **Reviewing / auditing** a design or diff vs the library | `review_against_library` |
-| **Adversarial multi-lens review** (before merge) | `adversarial_review` |
-| **Verifying "is it done"** | `definition_of_done` |
-| Building + testing | `build_and_test` |
-| Adding a test | `add_test` |
-| Profiling | `profile_subsystem` |
-| Optimizing a hot path | `optimize_loop` |
-| Generating content with an LLM | `generate_content` |
-| Adding telemetry | `add_telemetry_event` |
-| Exposing an action to an agent (MCP tool) | `add_agent_tool` |
-| State round-trip test | `snapshot_restore_test` |
-| Headless / CI operability gate | `validate_headless_mode` |
-| Keeping deferred work in the tracker | `track_followups` |
-| **Surveying a frontier topic** (web, real paper links) | `research_topic` |
-| **Testing a theory** (pre-registered experiment) | `run_experiment` |
-| **Writing the paper artifact** (`RR-NN`) | `write_research_report` |
-| *(domain-specific `add_*` / `debug_*` skills)* | *derived during onboarding* |
+Skills live in the project's `.claude/skills/` (each a `<name>/SKILL.md`) and read project paths/commands from `PROJECT_CONVENTIONS.md`, so the same skills work unmodified on any project. **The canonical catalog is `MANIFEST.json` `skills[]`** — audited against disk by `_audit_routing.py`; the human-browsable view is [`.claude/skills/README.md`](../.claude/skills/README.md). Don't maintain a third list here (it drifted when one existed). Loop-critical, by name: `onboard` · `prepare_compaction` · `plan_work` · `definition_of_done` · `adversarial_review` · `track_followups`; frontier: `research_topic` · `run_experiment` · `write_research_report`; domain `add_*` / `debug_*` skills are derived during onboarding.
 
 ---
 

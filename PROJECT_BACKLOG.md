@@ -4,9 +4,9 @@
 
 ## How this file is used
 
-- **`plan_work`** appends newly-planned work here under **Next**, each item linked to its plan and the STARTER_KIT milestone it advances.
-- **`definition_of_done`** moves an item to **Done** (with the date and the milestone exit-criterion it met) — only once every applicable gate passed.
+- Items land under **Next** when planned (`plan_work`'s Backlog step routes here while no `origin` exists), move to **Now** when started, and to **Done** when the `definition_of_done` gates pass (its tracker gate routes here pre-repo).
 - The agent reads **Now** first at the start of a session to resume context.
+- **Post-repo exception — `## Unfiled`:** if `gh` is briefly unreachable, `track_followups` parks items under an `## Unfiled` heading here (recreating this file if it was retired); `onboard` / `prepare_compaction` drain that section into real issues at the next checkpoint.
 
 Item format:
 

@@ -24,9 +24,9 @@ It's the generalized, blank-slate version of a proven setup: a domain "textbook"
 
 1. **Copy the folder.** Copy this entire `project_template/` to your new project location and rename it.
 2. **Drop your planning docs** from Claude Chat into [`_intake/`](_intake/) (see its README for what to include).
-3. **Onboard.** Open Claude Code in the folder and say *"let's onboard"* (runs [`onboard`](.claude/skills/onboard.md)). It reads the brief, fills in [`CLAUDE.md`](CLAUDE.md) Status + [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) + [`docs/ROADMAP.md`](docs/ROADMAP.md), and proposes the textbook outline.
-4. **Build the library.** Say *"let's build the library"* (runs [`build_library`](.claude/skills/build_library.md), which drives [`textbooks/LIBRARY_SEED.md`](textbooks/LIBRARY_SEED.md)). Iterate on coverage until the audits are green.
-5. **Configure.** Run [`configure_project`](.claude/skills/configure_project.md) to fill [`PROJECT_CONVENTIONS.md`](PROJECT_CONVENTIONS.md) with real paths/commands/stack.
+3. **Onboard.** Open Claude Code in the folder and say *"let's onboard"* (runs [`onboard`](.claude/skills/onboard/SKILL.md)). It reads the brief, fills in [`CLAUDE.md`](CLAUDE.md) Status + [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) + [`docs/ROADMAP.md`](docs/ROADMAP.md), and proposes the textbook outline.
+4. **Build the library.** Say *"let's build the library"* (runs [`build_library`](.claude/skills/build_library/SKILL.md), which drives [`textbooks/LIBRARY_SEED.md`](textbooks/LIBRARY_SEED.md)). Iterate on coverage until the audits are green.
+5. **Configure.** Run [`configure_project`](.claude/skills/configure_project/SKILL.md) to fill [`PROJECT_CONVENTIONS.md`](PROJECT_CONVENTIONS.md) with real paths/commands/stack.
 6. **Go on autopilot.** `git init`, create the private repo, and start the daily loop in [`CLAUDE.md`](CLAUDE.md) § *How we work*.
 
 ## Directory map
@@ -40,9 +40,12 @@ It's the generalized, blank-slate version of a proven setup: a domain "textbook"
 | [`PROJECT_BACKLOG.md`](PROJECT_BACKLOG.md) | **Pre-repo continuity only** — migrated to issues and deleted once the GitHub repo exists. |
 | [`textbooks/`](textbooks/) | The vendored RAG library: `LIBRARY_SEED.md` (how to build it), `MANIFEST`/`SECTIONS`/`ROUTING_EVAL` (machine indexes), `books/` `reference/` `vision/` `tools/`. |
 | [`research/`](research/) | The frontier layer: sourced+tiered survey notes, pre-registered experiments (`EXP-NN`), paper-style reports (`RR-NN`), and its own audit. Settled findings graduate into `textbooks/`. |
-| [`.claude/skills/`](.claude/skills/) | The reusable skill set (see [its README](.claude/skills/README.md)). |
-| [`scripts/`](scripts/) | `preflight.{sh,ps1}` — every merge-blocking gate locally, in CI order (mirrors the CI workflow; `configure_project` fills the TODO stages). Run before every push. |
-| [`.github/`](.github/) | CI gates (build / test / lint / **library audits** / **TODO hygiene**) + issue templates (`slice` / `decision` / `followup`) and the PR template that keep the tracker uniform and cold-readable. |
+| [`.claude/skills/`](.claude/skills/) | The reusable skill set — each skill a `<name>/SKILL.md` directory (see [its README](.claude/skills/README.md)). |
+| [`.claude/agents/`](.claude/agents/) | Tool-restricted subagents: `adversarial-reviewer` (Read/Grep/Glob — mechanically read-only) and `mech-sweeper` (cheap-model sweeps). |
+| [`.claude/hooks/`](.claude/hooks/) | Zero-token mechanical gates (naked-TODO commit block, session staleness banner) — inert until wired per [`docs/AUTOMATION.md`](docs/AUTOMATION.md). |
+| [`docs/AUTOMATION.md`](docs/AUTOMATION.md) | The operator console: hooks wiring, `@claude` GitHub Action, scheduled runs, settings proposals — everything that needs the human once. |
+| [`scripts/`](scripts/) | `preflight.{sh,ps1}` — every merge-blocking gate locally, in CI order (mirrors the CI workflow; `configure_project` fills the TODO stages; the audit/hygiene stages are real from day one). Run before every push. |
+| [`.github/`](.github/) | CI gates (build / test / lint / **library + research audits** / **skills structure** / **TODO hygiene**) + issue templates (`slice` / `decision` / `followup` / `research`) and the PR template that keep the tracker uniform and cold-readable. |
 
 ## The two layers, and why they're separate
 

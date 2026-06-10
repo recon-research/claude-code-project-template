@@ -2,6 +2,7 @@
 # Flags: --strict-staleness (stale notes fail instead of warn) · --live (HEAD-check cited URLs; local use, not CI)
 # Exits non-zero on errors, so CI can gate on it. See README.md for the discipline this enforces.
 import json, re, glob, os, sys, datetime
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # cwd-independent: data lives beside tools/
 
 errs, warns = [], []
 STRICT_STALE = "--strict-staleness" in sys.argv
@@ -85,7 +86,7 @@ for p in sorted(glob.glob("notes/*.md")):
         except ValueError:
             errs.append(f"{p}: unparseable reviewed date {m.group(1)!r}")
     for i, line in fenced_lines(lines):
-        if TIER.search(line):
+        if TIER.search(CODE_SPAN.sub("", line)):   # a `[published]` mention inside inline code is not a claim
             if not SRC.search(line):
                 errs.append(f"{p}:{i}: tiered claim without inline '(source: https://...)' on the same line")
             if not ACC.search(line):

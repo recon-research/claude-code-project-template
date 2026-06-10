@@ -164,7 +164,7 @@ Keep it valid JSON at all times (no trailing commas, no duplicate keys — a dup
 - How to use MANIFEST (`topic_to_books`/`rag_hints`/`coverage_gaps`) and SECTIONS (resolve/verify `§` refs — **grep it, don't load it whole**).
 - Default assumptions (the §1.4 tech baseline).
 - A "Topics Not Covered (be honest)" note deferring to `coverage_gaps` as the source of truth.
-- Leverage honesty (where the agent is ~1×).
+- Leverage honesty as a **pointer to AGENT_GUIDE §5** — one canonical list; restating it is how it drifts.
 - Style notes (cite at the most specific level; acknowledge alternatives; don't dogmatically apply patterns).
 
 ### 6.4 AGENT_GUIDE.md (the build loop) — include:
@@ -173,8 +173,8 @@ Keep it valid JSON at all times (no trailing commas, no duplicate keys — a dup
 - **The build loop**: classify → route → pre-mortem (ANTI_PATTERNS/SYMPTOMS first) → decide (DECISION_TREES) → implement → atomize (skill) → verify → profile → record.
 - A **worked example**: one concrete end-to-end trace through the loop for a small feature, each step citing a verifiable `Book NN §X`. (Worked examples anchor agents far better than abstract description — always include one.)
 - A **definition-of-done** checklist (the verification gate).
-- A **skills map** (atomic operation → skill).
-- **Leverage honesty** table.
+- A **skills map** — a pointer to the canonical catalog (MANIFEST `skills[]`, audited) + the loop-critical names; not a third full list.
+- **Leverage honesty** table (this is the canonical home).
 - **Maintenance**: regenerate SECTIONS + run both audits after edits.
 
 ### 6.5 ROUTING_EVAL.json — `{cases:[{query, expect:["book_NN"/"doc_id"], note?}]}`. Cover every volume and every reference doc with realistic, natural-language queries. Where more than one target is correct, list them all (pass = any in top-3).
@@ -208,7 +208,7 @@ description: One sentence on what it does AND when to use it (the triggers). Cla
 
 **Then derive domain-specific execution skills** from the library's recurring atomic operations — the "add a &lt;thing&gt;", "test a &lt;thing&gt;", "profile/optimize a &lt;thing&gt;", "debug a &lt;thing&gt;" tasks that come up repeatedly in *this* domain. Each cites its backing book(s). (For an engine these were add_component / add_render_pass / profile_subsystem / debug_shader…; for a sim they might be add_entity_type / add_event / add_metric / validate_determinism; for a compiler, add_pass / add_diagnostic / add_ir_node. Pick the real recurring operations.)
 
-Wire every skill into: the MANIFEST `skills[]` array, README + CLAUDE skill lists (and counts), `skills/README.md` table, and the AGENT_GUIDE skills map. Keep the skill count consistent across all of them (it drifts — verify it).
+Wire every skill into the MANIFEST `skills[]` array — the **catalog of record**, cross-checked against the skills on disk by `_audit_routing.py` (a registered-but-missing or on-disk-but-unregistered skill fails the audit) — and the human-facing `.claude/skills/README.md` table. Other docs point at the catalog; they don't restate it (restated lists drift).
 
 ---
 
@@ -232,6 +232,7 @@ These are domain-agnostic — they self-configure from MANIFEST. Write them to `
 ### 9.1 `_gen_sections.py`
 ```python
 import re, json, os
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # cwd-independent: data lives beside tools/
 M = json.load(open("MANIFEST.json", encoding="utf-8"))
 by_num = {b["number"]: b for b in M["books"]}
 HEAD = re.compile(r'^(#{2,5})\s+(.*?)\s*$')
@@ -268,6 +269,7 @@ print(f"Wrote SECTIONS.json: {len(out['books'])} books, {sum(b['section_count'] 
 ### 9.2 `_audit_refs.py`
 ```python
 import re, glob, os, json, collections
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # cwd-independent: data lives beside tools/
 M = json.load(open("MANIFEST.json", encoding="utf-8"))
 DOCNAMES = sorted({d["id"].upper() for d in M["reference_docs"]}, key=len, reverse=True)
 def canon(idtok):
@@ -306,8 +308,12 @@ DOC_IDS={d["id"].upper(): ids_of(d["path"]) for d in M["reference_docs"] if os.p
 GROUP=re.compile(r'(?<![\w.])(?:Book\s+)?(\d{1,2})\s*((?:§[A-Za-z0-9.]+)(?:\s*[,/&+]\s*§[A-Za-z0-9.]+)*)')
 IDPART=re.compile(r'§([A-Za-z0-9.]+)')
 DOCGROUP=re.compile(r'\b(' + '|'.join(DOCNAMES) + r')\s*((?:§[A-Za-z0-9.]+)(?:\s*[,/&]\s*§[A-Za-z0-9.]+)*)') if DOCNAMES else None
+def disp(p):
+    b=os.path.basename(p)
+    return os.path.basename(os.path.dirname(p))+'/'+b if b=='SKILL.md' else b
 bmiss=[]; dmiss=[]; bn_checked=0
 for p in (sorted(glob.glob("*.md")) + sorted(glob.glob("books/*.md")) + sorted(glob.glob("skills/*.md"))
+          + sorted(glob.glob("../.claude/skills/*/SKILL.md"))   # project-layout skills cite books too
           + sorted(glob.glob("reference/*.md")) + sorted(glob.glob("vision/*.md"))):
     if os.path.basename(p) in ('CHANGELOG.md','LIBRARY_SEED.md'): continue
     for i,line in enumerate(open(p,encoding='utf-8'),1):
@@ -316,13 +322,13 @@ for p in (sorted(glob.glob("*.md")) + sorted(glob.glob("books/*.md")) + sorted(g
             if bn not in book_ids: continue
             for idp in IDPART.findall(g.group(2)):
                 bn_checked+=1
-                if canon(idp) not in book_ids[bn]: bmiss.append((os.path.basename(p),i,bn,'§'+idp))
+                if canon(idp) not in book_ids[bn]: bmiss.append((disp(p),i,bn,'§'+idp))
         if DOCGROUP:
             for g in DOCGROUP.finditer(line):
                 dn=g.group(1)
                 if dn not in DOC_IDS: continue
                 for idp in IDPART.findall(g.group(2)):
-                    if canon(idp) not in DOC_IDS[dn]: dmiss.append((os.path.basename(p),i,dn,'§'+idp))
+                    if canon(idp) not in DOC_IDS[dn]: dmiss.append((disp(p),i,dn,'§'+idp))
 print(f"Book refs checked: {bn_checked} | misses: {len(bmiss)} | doc misses: {len(dmiss)}")
 for x in bmiss: print("  BOOK", x)
 for x in dmiss: print("  DOC ", x)
@@ -331,7 +337,8 @@ raise SystemExit(1 if (bmiss or dmiss) else 0)
 
 ### 9.3 `_audit_routing.py`
 ```python
-import json, re
+import json, re, os, glob
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # cwd-independent: data lives beside tools/
 M = json.load(open("MANIFEST.json", encoding="utf-8"))
 EV = json.load(open("ROUTING_EVAL.json", encoding="utf-8"))
 STOP=set("with that this into from your you should what does mean give make build using like want need have them and the for are can how why when which who your our its was just then than also more most some any all into onto over under via per each both these those an to of in on is it do i me my we us be as at or if so no not new use used uses".split())
@@ -371,12 +378,23 @@ for case in EV["cases"]:
     else: fails.append((q,expect,[(t,score(q,t)) for t in ranked[:3]]))
 print(f"Routing eval: {passed}/{len(EV['cases'])} passed")
 for q,e,t in fails: print(f"\nQ: {q}\n  expected {e}\n  got {t}")
-raise SystemExit(1 if fails else 0)
+# --- skills catalog: MANIFEST skills[] is the single catalog; it must match disk ---
+# (Skipped when no ../.claude/skills exists — e.g. a standalone library checkout.)
+sk_fails=[]
+sk_listed={str(s.get("path","")).replace("\\","/") for s in M.get("skills",[])}
+sk_disk={p.replace("\\","/") for p in glob.glob("../.claude/skills/*/SKILL.md")}
+if sk_disk:
+    sk_fails += [f"MANIFEST skills[] path missing on disk -> {p}" for p in sorted(sk_listed) if p.startswith("../.claude/") and not os.path.exists(p)]
+    sk_fails += [f"skill on disk not in MANIFEST skills[] -> {p}" for p in sorted(sk_disk - sk_listed)]
+for x in sk_fails: print("  SKILLS", x)
+print(f"Skills catalog: {len(sk_listed)} listed, {len(sk_disk)} on disk, {len(sk_fails)} mismatch(es)")
+raise SystemExit(1 if (fails or sk_fails) else 0)
 ```
 
 ### 9.4 `_audit_links.py`
 ```python
 import re, glob, os
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # cwd-independent: data lives beside tools/
 LINK = re.compile(r'\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)')
 CODE_SPAN = re.compile(r'`[^`]*`')   # inline code — an illustrative [text](x) inside it is not a real link
 SKIP = ('http://', 'https://', 'mailto:', '#')
@@ -411,7 +429,7 @@ raise SystemExit(1 if broken else 0)
 - [ ] `MANIFEST.json` is valid JSON; counts (`total_books`, `total_volumes`) match reality; `coverage_gaps` is honest.
 - [ ] `SECTIONS.json` regenerated; `_audit_refs.py` reports **0 misses**.
 - [ ] `ROUTING_EVAL.json` covers every volume + reference doc; `_audit_routing.py` reports **all pass**.
-- [ ] All skills have valid frontmatter; the 4 required meta-skills (+ optional `adversarial_review`) + `PROJECT_CONVENTIONS.md` exist; the skill count is consistent across MANIFEST/README/CLAUDE/skills-README.
+- [ ] All skills are `<name>/SKILL.md` directories with valid frontmatter (`name:` = directory name); the 4 required meta-skills (+ optional `adversarial_review`) + `PROJECT_CONVENTIONS.md` exist; `_audit_routing.py`'s skills-catalog check passes (MANIFEST `skills[]` ↔ disk) and `.claude/skills/README.md` matches.
 - [ ] `CLAUDE.md` (routing table + honesty) and `AGENT_GUIDE.md` (build loop + worked example + maintenance) exist and reflect the real structure.
 - [ ] No leftover placeholder names; the example-system name is consistent everywhere; `PROJECT_CONVENTIONS.md` carries it as the default.
 - [ ] `CHANGELOG.md` has an initial entry; `README.md` has reading paths + stats.

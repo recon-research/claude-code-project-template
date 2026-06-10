@@ -23,9 +23,9 @@ A cheaper FINAL scope must be argued here explicitly; a cheaper FIRST STEP towar
 ## Reversibility & interim behavior
 
 <pick one:>
-- **Reversible** — proceeding **provisionally** on the recommended default; objection window until <next checkpoint / milestone>. Overrule here async and the work re-routes.
+- **Reversible** — proceeding **provisionally** on the recommended default; objection window until <date / next checkpoint>. Every PR built on this default carries `Provisional on #NN` in its body. Overrule here async and the work re-routes; **silence past the window ratifies the default** (recorded as D-NN "ratified by silence", issue closed).
 - **Hard to reverse** (API shape / schema / migration / external commitment / money) — **blocked**; the slice is parked and work switched to the next independent slice.
 
 ## On decision
 
-Record as `D-NN` in docs/ARCHITECTURE.md Appendix A (decision · choice · grounding), reflect it in docs/ROADMAP.md, then close this issue.
+A comment here **is** the decision — `onboard` reads comments on every open `decision` issue. Record it as `D-NN` in docs/ARCHITECTURE.md Appendix A (decision · choice · grounding), reflect it in docs/ROADMAP.md, then close this issue. If the answer overrules a provisional default, file a re-route slice referencing every PR marked `Provisional on #NN`.
