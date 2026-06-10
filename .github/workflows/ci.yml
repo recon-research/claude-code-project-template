@@ -3,11 +3,21 @@
 # These jobs are the merge gate — they encode the definition_of_done gates that can run in CI.
 # Replace each `echo "TODO …"` placeholder with the real command, and the setup step with your toolchain's.
 # The library-audits and hygiene jobs are real and enforced from day one.
+# Keep this file mirrored by scripts/preflight.{sh,ps1} — if you change one, change the other.
 name: CI
 
+# PRs carry the merge gate; the push trigger is restricted to main so each PR
+# commit runs ONCE (an unrestricted push + pull_request pair runs everything
+# twice). The main-push run is the post-merge verification.
 on:
   push:
+    branches: [main]
   pull_request:
+
+# Rapid pushes to the same ref cancel the superseded run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-test:

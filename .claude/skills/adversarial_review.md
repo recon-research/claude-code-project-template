@@ -12,6 +12,7 @@ Run several **independent reviewers in parallel**, each with a different lens an
 The one rule that makes the parallel fan-out safe — **so the reviewers never trample each other's work**:
 
 - **Review phase = strictly read-only.** Every reviewer *analyzes* the diff and *returns findings*. **No reviewer edits the working tree.** That is precisely *why* they can run concurrently without trampling — there is nothing to trample, because nobody writes. A reviewer that wants to "just fix it inline" is a setup bug; stop it.
+- **A reviewer that must *execute* anything gets its own worktree.** "Read-only" covers edits, not builds: parallel reviewers *running* builds/tests/repros on one shared checkout still collide — they contend on the build directory (lock waits, half-written artifacts) and one agent's compile races another's test run, **manufacturing phantom failures that look exactly like real flakiness** (this once produced a spurious Critical finding on a real project). So any reviewer that needs to compile, run tests, reproduce a finding, or mutation-test gets `isolation: "worktree"` (its own checkout + build dir); pure Grep/Read reviewers may share the tree.
 - **Fix phase = a single coordinated writer.** Apply the must-fix set *after* the fan-out, from one place. By default **serially** in the working tree (one writer, no conflicts). Parallelize fixes only when they touch **disjoint files**, and then **isolate each in its own git worktree/branch** (e.g. the Workflow tool's `isolation: 'worktree'`, or a branch per fix) and merge back — never two fix agents writing the same tree at once.
 
 Keep the two phases strictly separated: reviewers find; one coordinated pass fixes. (This shape is also the token-efficient one: each reviewer burns its own subagent context; the orchestrator holds only the findings tables.)
@@ -49,6 +50,7 @@ A checkpoint gate for **high-stakes or novel** work at the **end of a feature, b
 
 - Reviewers genuinely attempted to falsify — reports carry worked counter-arguments, not check-marks.
 - **The review phase touched no files** — the diff after the fan-out equals the diff before it; every edit came from the coordinated fix pass.
+- Any "flaky / nondeterministic" finding was reproduced with a **single clean run in an isolated tree** before being accepted — shared-checkout / shared-build-dir contention between parallel agents is a known false-positive factory.
 - Every Critical / High / Med is fixed **or** explicitly accepted with a ticket; nothing merges / closes with an unaddressed one.
 - Every deferred finding has a ticket (`track_followups` ran); none lives only in the conversation.
 
@@ -60,4 +62,5 @@ A checkpoint gate for **high-stakes or novel** work at the **end of a feature, b
 - Don't let the lenses overlap; diverse angles are the whole point.
 - Don't merge / close with an unresolved Critical / High, or with findings parked only in chat.
 - Don't reach for the fan-out on trivial changes — that's `/code-review`'s job.
+- Don't let multiple reviewers build/test on one shared checkout — executing reviewers get `isolation: "worktree"`; and don't accept a flakiness finding without a clean isolated re-run.
 - Don't trust a device / environment-specific finding as cleared by CI when CI can't exercise it; note what only ran on the dev machine.
