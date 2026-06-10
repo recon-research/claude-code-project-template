@@ -11,7 +11,7 @@ labels: decision
 
 ## Options
 
-1. **<option A — the recommended default, listed first>** — <trade-off>; grounding: <Book NN §X / DECISION_TREES Dn>
+1. **<option A — the recommended default, listed first>** — <trade-off>; grounding: <Book NN §X / DECISION_TREES Dn / research note or RR-NN>
 2. **<option B>** — <trade-off>; grounding: <…>
 3. <option C, if real>
 

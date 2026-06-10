@@ -68,6 +68,23 @@ jobs:
           python tools/_audit_routing.py
           python tools/_audit_links.py
 
+  # Keeps the frontier research layer honest: MANIFEST routing complete, every
+  # tiered claim carries a real URL + accessed date, reports have their required
+  # sections, every figure/relative link resolves. Exits non-zero; blocks merge.
+  # (URL liveness is NOT checked here — run `--live` locally; the web is too
+  # flaky to gate merges on.)
+  research-audits:
+    name: research audits
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.x" }
+      - name: Audit research layer (citations / structure / links)
+        working-directory: research
+        env: { PYTHONIOENCODING: utf-8, PYTHONUTF8: "1" }
+        run: python tools/_audit_research.py
+
   # Tracker hygiene: added code must not contain a naked TODO/FIXME — every
   # deferral carries a filed ticket, written as TODO(#NN). Docs (*.md),
   # .github/ and textbooks/ are exempt (they *talk about* TODOs).

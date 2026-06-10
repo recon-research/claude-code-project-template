@@ -23,6 +23,7 @@ A structured, self-validating knowledge library for **&lt;DOMAIN&gt;**, with the
 | Named technique reference | [reference/PATTERNS.md](reference/PATTERNS.md) |
 | Build phase / milestone order | [reference/STARTER_KIT.md](reference/STARTER_KIT.md) |
 | Implementation work | the relevant `book(s)`; cross-reference via [MANIFEST.json](MANIFEST.json) |
+| Bleeding-edge / "is there newer research?" / state of the art | [../research/MANIFEST.json](../research/MANIFEST.json) — the frontier layer ([discipline](../research/README.md)); survey via `research_topic`. Cite as `research/...`, never as a `Book §`. |
 | Strategic / motivational | [vision/](vision/) (PROLOGUE / FUTURES / MOONSHOTS) |
 
 ### Step 2 — Use MANIFEST.json as the topic index

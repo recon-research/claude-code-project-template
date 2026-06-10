@@ -11,7 +11,7 @@
 - **Build / tests / lint:** <result>
 - **Domain gates** (state round-trip · headless · determinism — as applicable): <PASS / N/A + evidence>
 - **Performance claims:** <profile reference, or "none claimed">
-- **Library:** citations verified against SECTIONS.json; audits green if textbooks/ changed
+- **Library:** citations verified against SECTIONS.json; frontier claims cite research/ notes (sourced + tiered); audits green if textbooks/ or research/ changed
 
 ## Tracker hygiene
 

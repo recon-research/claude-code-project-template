@@ -28,7 +28,7 @@ Concrete patterns and **illustrative** pseudo-code (say plainly that it's illust
 
 ## 5. Bleeding Edge
 
-Recent research and state of the art — what's changing, what's not yet settled.
+Recent research and state of the art — what's changing, what's not yet settled. This section summarizes what has stabilized enough to teach; **live frontier work belongs in the project's `research/` layer** (sourced, tiered, dated) and graduates into here (or a deep-dive section) once it settles.
 
 ## 6. Gaps & Opportunities
 

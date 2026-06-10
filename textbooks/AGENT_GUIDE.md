@@ -18,6 +18,8 @@ Do **not** read whole books; your context is finite. Load artifacts in this orde
 6. **[../.claude/skills/](../.claude/skills/)** — the atomic operations (§3). **[reference/WORKFLOWS.md](reference/WORKFLOWS.md)** — multi-book recipes.
 7. **[reference/ANTI_PATTERNS.md](reference/ANTI_PATTERNS.md)** + **[reference/SYMPTOMS.md](reference/SYMPTOMS.md)** — the relevant entries *before* coding, and again when something breaks.
 
+8. **[../research/MANIFEST.json](../research/MANIFEST.json)** — for **post-textbook / frontier topics**: sourced + tiered + dated survey notes, experiments, reports. Different trust model — cite as `research/notes/<file>.md` / `RR-NN`, never as a `Book §`; notes stale ~2 quarters (re-verify before planning against one).
+
 **Context discipline:** delegate broad, exploratory reads to read-only subagents and keep only their conclusions; reserve the main context for the current diff and the decisions. Grep the indexes; never load them whole.
 
 ---
@@ -94,6 +96,9 @@ These live in the project's `.claude/skills/` and read project paths/commands fr
 | State round-trip test | `snapshot_restore_test` |
 | Headless / CI operability gate | `validate_headless_mode` |
 | Keeping deferred work in the tracker | `track_followups` |
+| **Surveying a frontier topic** (web, real paper links) | `research_topic` |
+| **Testing a theory** (pre-registered experiment) | `run_experiment` |
+| **Writing the paper artifact** (`RR-NN`) | `write_research_report` |
 | *(domain-specific `add_*` / `debug_*` skills)* | *derived during onboarding* |
 
 ---

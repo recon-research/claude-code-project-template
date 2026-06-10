@@ -1,10 +1,11 @@
 # Project Template — Claude-Code-on-Autopilot
 
-A reusable starting point for any new project built primarily by Claude Code. It bundles three things that work together:
+A reusable starting point for any new project built primarily by Claude Code. It bundles four things that work together:
 
 1. **A vendored RAG knowledge library** (`textbooks/`) — you grow an exhaustive, self-validating "textbook series" for the project's domain, with machine indexes (`MANIFEST.json` / `SECTIONS.json`) so the agent can route to and cite exact sections.
-2. **A reusable, domain-agnostic skill set** (`.claude/skills/`) — planning, review, verification, build/test, content-gen, onboarding, and compaction procedures that read project specifics from `PROJECT_CONVENTIONS.md` (so the same skills work on any project).
-3. **An autopilot project harness** (`CLAUDE.md`, `docs/`, `.github/`) — a Status/onboard/compaction loop, a decision log, milestone roadmap, and CI gate, so Claude Code can ticket → implement → verify → PR → merge with the human only making decisions.
+2. **A frontier research pipeline** (`research/`) — bleeding-edge topics surveyed online into sourced+tiered notes (real fetched paper links, never recalled citations), tested via pre-registered experiments with plottable results, and published as paper-style report artifacts — all audited and CI-gated.
+3. **A reusable, domain-agnostic skill set** (`.claude/skills/`) — planning, review, verification, build/test, research, onboarding, and compaction procedures that read project specifics from `PROJECT_CONVENTIONS.md` (so the same skills work on any project).
+4. **An autopilot project harness** (`CLAUDE.md`, `docs/`, `.github/`) — a Status/onboard/compaction loop, a decision log, milestone roadmap, and CI gates, so Claude Code can ticket → implement → verify → PR → merge with the human only making decisions.
 
 It's the generalized, blank-slate version of a proven setup: a domain "textbook" library plus a real codebase that consumes it and runs itself.
 
@@ -38,6 +39,7 @@ It's the generalized, blank-slate version of a proven setup: a domain "textbook"
 | [`PROJECT_CONVENTIONS.md`](PROJECT_CONVENTIONS.md) | Per-project paths / commands / stack. Every skill reads it. |
 | [`PROJECT_BACKLOG.md`](PROJECT_BACKLOG.md) | **Pre-repo continuity only** — migrated to issues and deleted once the GitHub repo exists. |
 | [`textbooks/`](textbooks/) | The vendored RAG library: `LIBRARY_SEED.md` (how to build it), `MANIFEST`/`SECTIONS`/`ROUTING_EVAL` (machine indexes), `books/` `reference/` `vision/` `tools/`. |
+| [`research/`](research/) | The frontier layer: sourced+tiered survey notes, pre-registered experiments (`EXP-NN`), paper-style reports (`RR-NN`), and its own audit. Settled findings graduate into `textbooks/`. |
 | [`.claude/skills/`](.claude/skills/) | The reusable skill set (see [its README](.claude/skills/README.md)). |
 | [`.github/`](.github/) | CI gates (build / test / lint / **library audits** / **TODO hygiene**) + issue templates (`slice` / `decision` / `followup`) and the PR template that keep the tracker uniform and cold-readable. |
 

@@ -17,6 +17,7 @@ This skill assumes the library is reachable (the project's `CLAUDE.md` points at
    - Query `MANIFEST.json` `topic_to_books` + `rag_hints` for the topic → candidate books.
    - Resolve the exact sections with `SECTIONS.json` (`id` / `title` / `line`) — do **not** read whole books.
    - If the task involves an architectural fork, open the matching `DECISION_TREES.md` node first — many choices are already settled there with trade-offs.
+   - **Frontier topic?** (a state-of-the-art question, a post-textbook technique, or the routed book's Bleeding Edge section doesn't settle it) — route via `research/MANIFEST.json`; if unsurveyed or stale, run `research_topic` first. Frontier claims cite `research/notes/<file>.md` / `RR-NN` (sourced + tiered), **never** a `Book §`.
 
 3. **Read narrowly.** Read only the routed sections (architecture + implementation). Capture the library's recommended option **and** the documented alternatives it compares. If exploration must be broad, delegate it to read-only subagents and keep only their conclusions in context.
 

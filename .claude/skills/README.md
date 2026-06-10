@@ -19,6 +19,14 @@ Drop-in procedures Claude Code follows when invoked (or when a request matches a
 | [review_against_library.md](review_against_library.md) | "audit this design vs the library" — cited Must-fix/Consider; `--fix` applies mechanical fixes. |
 | [adversarial_review.md](adversarial_review.md) | Before merge on a substantial change — N independent reviewers prompted to falsify claims. |
 
+## Frontier research
+
+| Skill | When |
+|-------|------|
+| [research_topic.md](research_topic.md) | "research X" / "state of the art" — survey online into a sourced+tiered note in `research/notes/`. |
+| [run_experiment.md](run_experiment.md) | "test the theory" / "benchmark X vs Y" — pre-registered, reproducible experiment (`EXP-NN`). |
+| [write_research_report.md](write_research_report.md) | "write up the experiment" — paper artifact (`RR-NN`) with real-link references. |
+
 ## Verification
 
 | Skill | When |

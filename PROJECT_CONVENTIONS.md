@@ -20,7 +20,8 @@ The drop-in skills describe *what* to do; the project-specific *where* and *how*
 - **Main source**: `<where the code lives, e.g. src/ or crates/>`
 - **The project's main unit types**: `<where the recurring "things" live — the analogue of components/passes/modules — so add_* skills know where to put them>`
 - **Tests**: `<where tests live>`
-- **Design docs**: `docs/` · **Reference library**: `textbooks/`
+- **Experiment harness**: `<where research-experiment code lives — read by run_experiment>`
+- **Design docs**: `docs/` · **Reference library**: `textbooks/` · **Frontier layer**: `research/`
 
 ## Stack
 - **Core frameworks / libraries**: &lt;fill in&gt;
@@ -39,7 +40,7 @@ The drop-in skills describe *what* to do; the project-specific *where* and *how*
 
 ## Tracker & Hygiene
 - **Issue tracker**: &lt;e.g. GitHub Issues on `<org>/<repo>`&gt; — the live backlog; **defer = file now** (`track_followups`).
-- **Labels**: `slice` (a unit of roadmap work) · `decision` (fork awaiting the human) · `followup` (deferred work) · `idea` · `debt` · `bug` · `blocked`. Created once at repo setup (`onboard` Mode A); the issue templates apply them.
+- **Labels**: `slice` (a unit of roadmap work) · `decision` (fork awaiting the human) · `followup` (deferred work) · `idea` · `debt` · `bug` · `blocked` · `research` (frontier question to survey). Created once at repo setup (`onboard` Mode A); the issue templates apply them.
 - **Branch naming**: `slice/<issue#>-<slug>` · **PR title**: `M<n> <slice>: <imperative summary> (closes #<issue>)`.
 - **TODO convention**: a TODO entering code must reference a filed ticket — `TODO(#NN): …`. Naked `TODO`/`FIXME` fails `definition_of_done` and the CI hygiene job.
 - **Merge policy**: &lt;squash / merge-commit — pick one&gt;; PRs require green CI; `main` is never pushed directly.

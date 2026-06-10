@@ -61,7 +61,10 @@
     { "path": "../.claude/skills/add_agent_tool.md", "triggers": ["add MCP tool", "add agent tool"], "description": "Add a typed, validated, permission-filtered MCP tool." },
     { "path": "../.claude/skills/snapshot_restore_test.md", "triggers": ["snapshot test", "rollback test"], "description": "Round-trip snapshot/restore test for any state-owning subsystem." },
     { "path": "../.claude/skills/validate_headless_mode.md", "triggers": ["validate headless", "headless CI"], "description": "CI gate: initializes/ticks/shuts down with no window/device/human." },
-    { "path": "../.claude/skills/track_followups.md", "triggers": ["track followups", "file the deferred work"], "description": "Ensure deferred work lives in the tracker, not only in chat." }
+    { "path": "../.claude/skills/track_followups.md", "triggers": ["track followups", "file the deferred work"], "description": "Ensure deferred work lives in the tracker, not only in chat." },
+    { "path": "../.claude/skills/research_topic.md", "triggers": ["research", "state of the art", "survey papers", "bleeding edge"], "description": "Survey a frontier topic online into a sourced + tiered research note (real fetched links only)." },
+    { "path": "../.claude/skills/run_experiment.md", "triggers": ["run an experiment", "test the theory", "benchmark", "implement the paper"], "description": "Pre-registered, reproducible experiment with comparable, plottable results (EXP-NN)." },
+    { "path": "../.claude/skills/write_research_report.md", "triggers": ["research report", "write up the experiment", "paper artifact", "whitepaper"], "description": "Markdown-first paper artifact (RR-NN) with real-link references and regenerable figures." }
   ],
   "rag_hints": {
     "for_authoring_a_new_book": ["book_00"],

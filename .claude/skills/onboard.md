@@ -16,7 +16,7 @@ The session entry point. Decide which mode you're in, then run it. Token-lean by
 4. Propose the **textbook/RAG library outline** per [`textbooks/LIBRARY_SEED.md`](../../textbooks/LIBRARY_SEED.md) §1 and get explicit approval. Hand off to [`build_library`](build_library.md).
 5. Run [`configure_project`](configure_project.md) to fill [`PROJECT_CONVENTIONS.md`](../../PROJECT_CONVENTIONS.md) once code/tooling exists.
 6. **When the repo goes live** (`gh repo create <name> --private --source . --push`):
-   - Create the label set from `PROJECT_CONVENTIONS.md` › Tracker & Hygiene: `gh label create slice decision followup idea debt blocked` (one `gh label create <name> -d "<desc>" || true` each — idempotent).
+   - Create the label set from `PROJECT_CONVENTIONS.md` › Tracker & Hygiene: `slice decision followup idea debt blocked research` (one `gh label create <name> -d "<desc>" || true` each — idempotent).
    - Protect `main` (require PRs + green CI) so autopilot can't bypass the gates.
    - **Migrate any `PROJECT_BACKLOG.md` items to issues and delete that file** — once the tracker exists, a second backlog is a staleness machine.
 
