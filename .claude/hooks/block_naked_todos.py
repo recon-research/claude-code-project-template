@@ -31,7 +31,7 @@ def chdir_repo_root():
     if root and os.path.isdir(root):
         os.chdir(root)
 
-EXEMPT = [":!*.md", ":!.github", ":!textbooks", ":!scripts/preflight.sh", ":!scripts/preflight.ps1"]
+EXEMPT = [":!*.md", ":!.github", ":!textbooks", ":!scripts/preflight.sh", ":!scripts/preflight.ps1", ":!.claude/hooks"]
 TICKETED = re.compile(r"(?i)\b(todo|fixme)\(#\d+\)")
 NAKED = re.compile(r"(?i)\b(todo|fixme)\b")
 

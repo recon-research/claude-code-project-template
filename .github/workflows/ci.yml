@@ -126,7 +126,8 @@ jobs:
 
   # Tracker hygiene: added code must not contain a naked TODO/FIXME — every
   # deferral carries a filed ticket, written as TODO(#NN). Docs (*.md),
-  # .github/ and textbooks/ are exempt (they *talk about* TODOs).
+  # .github/, textbooks/ and .claude/hooks/ are exempt (they *talk about*
+  # TODOs — the hooks dir includes the very script that enforces this rule).
   hygiene:
     name: hygiene (no naked TODOs)
     if: github.event_name == 'pull_request'
@@ -147,7 +148,7 @@ jobs:
         run: |
           git fetch origin "${{ github.base_ref }}" --quiet
           naked=$(git diff "origin/${{ github.base_ref }}...HEAD" -- . ':!*.md' ':!.github' ':!textbooks' \
-            ':!scripts/preflight.sh' ':!scripts/preflight.ps1' \
+            ':!scripts/preflight.sh' ':!scripts/preflight.ps1' ':!.claude/hooks' \
             | grep -E '^\+' | grep -vE '^\+\+\+' \
             | sed -E 's/(todo|fixme)\(#[0-9]+\)//gI' | grep -iE '\b(todo|fixme)\b' || true)
           if [ -n "$naked" ]; then
