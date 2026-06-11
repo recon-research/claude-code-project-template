@@ -43,7 +43,10 @@ def main():
     if payload.get("tool_name") not in ("Bash", "PowerShell"):
         return 0
     command = str(payload.get("tool_input", {}).get("command", ""))
-    if not re.match(r"\s*git\s+commit\b", command):
+    # search, not match-at-start: agent commits routinely arrive inside
+    # compound commands ("cd repo && git add -A && git commit -F -"), which
+    # a start-anchored match silently waves through.
+    if not re.search(r"(?:^|[;&|])\s*git\s+commit\b", command):
         return 0
     chdir_repo_root()
     try:
