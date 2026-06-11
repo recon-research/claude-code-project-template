@@ -61,6 +61,12 @@ jobs:
         run: 'echo "TODO: format --check command"'
       - name: Lint
         run: 'echo "TODO: lint command (warnings as errors)"'
+      # Optional: docs build as a merge gate (doc warnings as errors) — uncomment
+      # if the stack has one (rustdoc / typedoc / sphinx …); a doc-warning gate
+      # catches rot the moment it lands instead of at release. Mirror the command
+      # into scripts/preflight.{sh,ps1} if you enable it.
+      # - name: Docs (warnings as errors)
+      #   run: 'echo "TODO: docs build command"'
 
   # Keeps the knowledge library honest on every push. The audit scripts exit
   # non-zero on any unresolved citation / failed routing case / broken link,

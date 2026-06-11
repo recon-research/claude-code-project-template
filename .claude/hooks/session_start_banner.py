@@ -1,13 +1,15 @@
-# SessionStart hook (matchers: startup|resume, and compact): prints a tiny
-# staleness banner — stdout is injected into the session as context, so the
-# agent starts every session (and every post-compaction window) knowing
-# whether the CLAUDE.md Status anchor is stale and what decisions are open,
-# for ~100 tokens and zero conversation round-trips.
+# SessionStart hook (matchers: startup|resume|clear, and compact): prints a
+# tiny staleness banner — stdout is injected into the session as context, so
+# the agent starts every session (and every post-compaction / post-/clear
+# window) knowing whether the CLAUDE.md Status anchor is stale and what
+# decisions are open, for ~100 tokens and zero conversation round-trips.
 #
-# Wiring (see docs/AUTOMATION.md — settings.json changes are owner-applied):
+# Wiring (see docs/AUTOMATION.md — settings.json changes are owner-applied;
+# ${CLAUDE_PROJECT_DIR} is the braced placeholder Claude Code substitutes
+# itself, so it works regardless of which shell runs the hook):
 #   "hooks": { "SessionStart": [
-#     { "matcher": "startup|resume", "hooks": [ { "type": "command", "command": "python .claude/hooks/session_start_banner.py" } ] },
-#     { "matcher": "compact",        "hooks": [ { "type": "command", "command": "python .claude/hooks/session_start_banner.py" } ] } ] }
+#     { "matcher": "startup|resume|clear", "hooks": [ { "type": "command", "command": "python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session_start_banner.py\"" } ] },
+#     { "matcher": "compact",              "hooks": [ { "type": "command", "command": "python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session_start_banner.py\"" } ] } ] }
 #
 # Contract: exit 0 always; stdout = injected context; on any error print
 # nothing (a banner must never wedge a session).

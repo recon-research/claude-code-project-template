@@ -99,7 +99,8 @@ Produce the library in this order (each step sets up the next):
 7. **Write `CLAUDE.md`, `AGENT_GUIDE.md`, `README.md`** (templates in §6.3–6.4) using the now-real structure.
 8. **Write `ROUTING_EVAL.json`**: ~30–60 realistic queries spanning every volume + reference doc, each with expected target(s) (§6.5).
 9. **Validate to green**: run `_audit_refs.py` (0 misses) and `_audit_routing.py` (all pass). Fix what they flag — broken citations in the books; routing gaps by adding `topic_to_books`/`rag_hints` entries or enriching a book's `topics`/`summary`.
-10. **Write `CHANGELOG.md`** (initial entry) and a final consistency sweep (counts, JSON validity, 0 leftover placeholder / example-system names).
+10. **Adversarial content review (the errata pass)**: the audits prove *consistency*, not *truth*. Fan out parallel read-only reviewers (one per volume / topic cluster; lenses: math/units, API-and-version reality, security claims, cross-book contradictions, staleness) mandated to falsify the books' technical claims; severity-tag (Crit = following it would ship a defect or waste a milestone · High = materially wrong · Med = unlikely to bite · Low = imprecision), fix in one coordinated pass, commit a ledger (`docs/notes/LIBRARY_REVIEW_<date>.md`: verdict counts, the Criticals named, a `file | locator | edit` table), regenerate SECTIONS and re-audit. Repeat after major growth passes. (Orchestration recipe: the `build_library` + `adversarial_review` skills.)
+11. **Write `CHANGELOG.md`** (initial entry) and a final consistency sweep (counts, JSON validity, 0 leftover placeholder / example-system names).
 
 ---
 
@@ -434,6 +435,7 @@ raise SystemExit(1 if broken else 0)
 - [ ] No leftover placeholder names; the example-system name is consistent everywhere; `PROJECT_CONVENTIONS.md` carries it as the default.
 - [ ] `CHANGELOG.md` has an initial entry; `README.md` has reading paths + stats.
 - [ ] A grep for the old/placeholder counts returns nothing.
+- [ ] An **adversarial content review** (errata pass, §3 step 10) ran once the library stabilized; its ledger is committed and every Critical is fixed.
 
 ---
 

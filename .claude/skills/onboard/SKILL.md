@@ -24,7 +24,7 @@ The session entry point. Decide which mode you're in, then run it. Token-lean by
 5. Run [`configure_project`](../configure_project/SKILL.md) to fill [`PROJECT_CONVENTIONS.md`](../../../PROJECT_CONVENTIONS.md) once code/tooling exists.
 6. **When the repo goes live** (`gh repo create <name> --private --source . --push`):
    - Create **every** label listed in `PROJECT_CONVENTIONS.md` › Tracker & Hygiene (one `gh label create <name> -d "<desc>" || true` each — idempotent; don't enumerate from memory or trust GitHub's default labels to cover the set).
-   - Protect `main` — require PRs + green checks **and enable "include administrators"** (otherwise `gh pr merge --admin` silently bypasses every gate). This is an **attended** step: use the web UI or `gh api` (deliberately not pre-approved).
+   - Protect `main` — require PRs + green checks **and enable "include administrators"** (otherwise `gh pr merge --admin` silently bypasses every gate). This is an **attended** step: use the web UI or `gh api` (deliberately not pre-approved). **Caveat:** on a free-plan **private** repo, GitHub does not enforce branch protection/rulesets — the options are GitHub Pro, an org plan, or a public repo. Until one of those holds, the written policy + the allowlist's narrowed grants are the *only* guard against force-push/main-push — say so in Status, and revisit the moment the repo goes public or Pro.
    - **Migrate any `PROJECT_BACKLOG.md` items to issues and delete that file** — once the tracker exists, a second backlog is a staleness machine.
    - File the standing day-one followup: replace `textbooks/AGENT_GUIDE.md` §1.5's schematic trace with a real one after the first slice ships.
 

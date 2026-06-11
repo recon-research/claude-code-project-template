@@ -45,10 +45,12 @@
   ],
   "skills": [
     { "path": "../.claude/skills/onboard/SKILL.md", "triggers": ["onboard", "welcome back", "let's continue"], "description": "Resume a session: read Status + ROADMAP + open issues, pick up the resume point." },
+    { "path": "../.claude/skills/ship_pr/SKILL.md", "triggers": ["ship it", "open a PR", "land this", "merge this"], "description": "The PR-gated path to main: preflight, branch, commit, PR, CI watch, merge per policy, prune, merge-time checkpoint." },
     { "path": "../.claude/skills/prepare_compaction/SKILL.md", "triggers": ["prepare for compaction", "checkpoint", "wrap up"], "description": "Checkpoint before context runs out: rewrite Status, update docs, file followups, push." },
     { "path": "../.claude/skills/build_library/SKILL.md", "triggers": ["build the library", "write the textbooks", "grow the library"], "description": "Drive LIBRARY_SEED.md to author/extend the textbook/RAG library and keep the audits green." },
     { "path": "../.claude/skills/configure_project/SKILL.md", "triggers": ["configure project", "set up skills"], "description": "Inspect the repo and fill PROJECT_CONVENTIONS.md." },
     { "path": "../.claude/skills/plan_work/SKILL.md", "triggers": ["plan", "design", "architect"], "description": "Library-grounded implementation plan; the planning front-end." },
+    { "path": "../.claude/skills/plan_milestone_tickets/SKILL.md", "triggers": ["plan the milestone", "break down into tickets", "refine the epic"], "description": "Refine a milestone/epic into grounded, dependency-ordered slice tickets at milestone start (the horizon rule)." },
     { "path": "../.claude/skills/review_against_library/SKILL.md", "triggers": ["review against the library", "audit this design"], "description": "Conformance audit of a design/diff vs the library, cited Must-fix/Consider." },
     { "path": "../.claude/skills/adversarial_review/SKILL.md", "triggers": ["adversarial review", "red-team", "review before merge"], "description": "Multi-lens independent review before merge; fans out reviewers to falsify claims." },
     { "path": "../.claude/skills/definition_of_done/SKILL.md", "triggers": ["is this done", "run the gates", "definition of done"], "description": "Run the full verification gate with per-gate evidence." },

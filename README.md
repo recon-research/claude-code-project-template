@@ -20,7 +20,7 @@ It's the generalized, blank-slate version of a proven setup: a domain "textbook"
    ↳ daily: "welcome back, onboard and continue" · "prepare for compaction" · pick a decision
 ```
 
-**Prerequisites:** Claude Code (desktop app or CLI), `git`, the GitHub CLI authenticated (`gh auth login`), and Python 3 on PATH (the audits and hooks are stdlib-only Python). On Windows, Git for Windows provides the bash the scripts and hooks use.
+**Prerequisites:** Claude Code (desktop app or CLI), `git`, the GitHub CLI authenticated (`gh auth login`), and Python 3 on PATH (the audits and hooks are stdlib-only Python). On Windows, Git for Windows provides the bash that `scripts/preflight.sh` uses — or use the native `scripts\preflight.ps1` twin; the hooks and audits are plain Python and need no bash.
 
 ## Starting a new project
 
