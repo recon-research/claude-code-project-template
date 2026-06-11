@@ -1,12 +1,16 @@
-# PreToolUse hook (matcher: Bash): blocks `git commit` while the STAGED diff
-# adds a naked TODO/FIXME — the zero-token local twin of ci.yml's hygiene job
-# (same exemptions, same per-occurrence rule). Blocking-hook decisions take
-# precedence over the allowlist, so the pre-approved `git commit:*` grant
-# can't bypass this.
+# PreToolUse hook (matcher: Bash|PowerShell): blocks `git commit` while the
+# STAGED diff adds a naked TODO/FIXME — the zero-token local twin of ci.yml's
+# hygiene job (same exemptions, same per-occurrence rule). Blocking-hook
+# decisions take precedence over the allowlist, so the pre-approved
+# `git commit:*` grant can't bypass this. The matcher (and the tool_name check
+# below) must cover BOTH shell tools: on native Windows the agent issues git
+# through the PowerShell tool, and a Bash-only hook silently never fires.
 #
-# Wiring (see docs/AUTOMATION.md — settings.json changes are owner-applied):
-#   "hooks": { "PreToolUse": [ { "matcher": "Bash",
-#     "hooks": [ { "type": "command", "command": "python .claude/hooks/block_naked_todos.py" } ] } ] }
+# Wiring (see docs/AUTOMATION.md — settings.json changes are owner-applied;
+# ${CLAUDE_PROJECT_DIR} is the braced placeholder Claude Code substitutes
+# itself, so it works regardless of which shell runs the hook):
+#   "hooks": { "PreToolUse": [ { "matcher": "Bash|PowerShell",
+#     "hooks": [ { "type": "command", "command": "python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/block_naked_todos.py\"" } ] } ] }
 #
 # Contract: stdin = tool-call JSON; exit 0 = allow, exit 2 = block (stderr
 # becomes the reason shown to the agent). Any internal error → allow (exit 0):
@@ -27,7 +31,7 @@ def chdir_repo_root():
     if root and os.path.isdir(root):
         os.chdir(root)
 
-EXEMPT = [":!*.md", ":!.github", ":!textbooks", ":!scripts/preflight.sh", ":!scripts/preflight.ps1"]
+EXEMPT = [":!*.md", ":!.github", ":!textbooks", ":!scripts/preflight.sh", ":!scripts/preflight.ps1", ":!.claude/hooks"]
 TICKETED = re.compile(r"(?i)\b(todo|fixme)\(#\d+\)")
 NAKED = re.compile(r"(?i)\b(todo|fixme)\b")
 
@@ -36,7 +40,7 @@ def main():
         payload = json.load(sys.stdin)
     except Exception:
         return 0
-    if payload.get("tool_name") != "Bash":
+    if payload.get("tool_name") not in ("Bash", "PowerShell"):
         return 0
     command = str(payload.get("tool_input", {}).get("command", ""))
     if not re.match(r"\s*git\s+commit\b", command):

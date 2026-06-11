@@ -61,6 +61,12 @@ jobs:
         run: 'echo "TODO: format --check command"'
       - name: Lint
         run: 'echo "TODO: lint command (warnings as errors)"'
+      # Optional: docs build as a merge gate (doc warnings as errors) — uncomment
+      # if the stack has one (rustdoc / typedoc / sphinx …); a doc-warning gate
+      # catches rot the moment it lands instead of at release. Mirror the command
+      # into scripts/preflight.{sh,ps1} if you enable it.
+      # - name: Docs (warnings as errors)
+      #   run: 'echo "TODO: docs build command"'
 
   # Keeps the knowledge library honest on every push. The audit scripts exit
   # non-zero on any unresolved citation / failed routing case / broken link,
@@ -120,7 +126,8 @@ jobs:
 
   # Tracker hygiene: added code must not contain a naked TODO/FIXME — every
   # deferral carries a filed ticket, written as TODO(#NN). Docs (*.md),
-  # .github/ and textbooks/ are exempt (they *talk about* TODOs).
+  # .github/, textbooks/ and .claude/hooks/ are exempt (they *talk about*
+  # TODOs — the hooks dir includes the very script that enforces this rule).
   hygiene:
     name: hygiene (no naked TODOs)
     if: github.event_name == 'pull_request'
@@ -141,7 +148,7 @@ jobs:
         run: |
           git fetch origin "${{ github.base_ref }}" --quiet
           naked=$(git diff "origin/${{ github.base_ref }}...HEAD" -- . ':!*.md' ':!.github' ':!textbooks' \
-            ':!scripts/preflight.sh' ':!scripts/preflight.ps1' \
+            ':!scripts/preflight.sh' ':!scripts/preflight.ps1' ':!.claude/hooks' \
             | grep -E '^\+' | grep -vE '^\+\+\+' \
             | sed -E 's/(todo|fixme)\(#[0-9]+\)//gI' | grep -iE '\b(todo|fixme)\b' || true)
           if [ -n "$naked" ]; then

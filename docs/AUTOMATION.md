@@ -56,3 +56,5 @@ jobs:
 ## 5. Branch protection (repo setup, attended)
 
 Require PRs + the CI checks **and enable "include administrators"** — without it, `gh pr merge --admin` (inside the pre-approved `gh pr merge:*` grant) bypasses every gate. `onboard` Mode A marks this step attended; `gh api` is deliberately not pre-approved.
+
+**Free-tier caveat (hard-won):** on a free-plan **private** repo GitHub does not enforce branch protection or rulesets at all — the protection UI exists but the rules don't bind. Mechanical enforcement requires GitHub Pro, an org plan, or making the repo public. Until then the written merge policy (`PROJECT_CONVENTIONS.md`) plus the allowlist's narrowed grants are the *only* guard — treat the settings.json `$comment`'s honesty about prefix-matching holes as load-bearing, and revisit protection the moment the repo's plan or visibility changes.

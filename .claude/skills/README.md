@@ -9,6 +9,7 @@ Drop-in procedures Claude Code follows when invoked (or when a request matches a
 | Skill | When |
 |-------|------|
 | [onboard](onboard/SKILL.md) | "welcome back" / "let's onboard and continue" — start or resume a session. |
+| [ship_pr](ship_pr/SKILL.md) | "ship it" / "land this" — the PR-gated path to main: preflight → PR → green CI → merge → checkpoint. |
 | [prepare_compaction](prepare_compaction/SKILL.md) | "let's prepare for compaction" — checkpoint to the docs + tracker before context is lost. |
 | [build_library](build_library/SKILL.md) | "build the library" / "write the textbooks" — author/extend `textbooks/`. |
 
@@ -18,6 +19,7 @@ Drop-in procedures Claude Code follows when invoked (or when a request matches a
 |-------|------|
 | [configure_project](configure_project/SKILL.md) | Inspect the repo → fill `PROJECT_CONVENTIONS.md`. |
 | [plan_work](plan_work/SKILL.md) | "plan" / "design" / "what approach" — library-grounded plan; the planning front-end. |
+| [plan_milestone_tickets](plan_milestone_tickets/SKILL.md) | Milestone start — refine the epic into grounded, dependency-ordered slice tickets (the horizon rule). |
 | [review_against_library](review_against_library/SKILL.md) | "audit this design vs the library" — cited Must-fix/Consider; `--fix` applies mechanical fixes. |
 | [adversarial_review](adversarial_review/SKILL.md) | Before merge on a substantial change — N independent reviewers prompted to falsify claims. |
 
