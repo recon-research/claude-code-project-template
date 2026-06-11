@@ -1,0 +1,9 @@
+# TEMPLATE_VERSION — provenance stamp (one `key: value` per line).
+# Written by `onboard` (Mode A) right after the template is copied; re-stamped by
+# `update_from_template` after every sync. `update_from_template` diffs the upstream
+# template from `sha` to its HEAD to know what changed — without this stamp, every
+# template update is hand archaeology.
+source: <path or URL of the project_template this project was copied from>
+sha: <template commit at copy time — `git -C <source> rev-parse HEAD`>
+copied: <YYYY-MM-DD>
+last_update: <YYYY-MM-DD — bumped on every template sync>

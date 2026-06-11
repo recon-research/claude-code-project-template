@@ -59,4 +59,5 @@ The drop-in skills describe *what* to do; the project-specific *where* and *how*
 - No `&&` / `||` pipeline chains (parser error) — sequence with `;` or `if ($?) { … }`.
 - Don't pipe native commands (git, build tools) through `2>&1` — PS 5.1 wraps each stderr line in an ErrorRecord and poisons `$?` even on exit 0.
 - `gh pr create` / `gh issue create`: always `--body-file` (see PR / commit mechanics above).
+- Property access does **not** expand inside a larger argument token: `-f title=$m.t` passes the literal text `<typename>.t` — wrap member access in a subexpression: `-f "title=$($m.t)"`.
 - Keep `.ps1` output strings ASCII — PS 5.1 reads un-BOM'd scripts as ANSI (non-ASCII becomes mojibake).

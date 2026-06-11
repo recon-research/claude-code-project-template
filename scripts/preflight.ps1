@@ -1,5 +1,5 @@
 # preflight.ps1 — every merge-blocking gate, locally, in CI order.
-# TEMPLATE: replace each `Write-Host "TODO …"` stage body with the real command from
+# TEMPLATE: replace each `Skip-Stage` placeholder with a real `Invoke-Stage` body from
 # PROJECT_CONVENTIONS.md > Build & Test (the same commands .github/workflows/ci.yml
 # runs — keep the two mirrored: if you change one, change the other).
 #
@@ -9,8 +9,8 @@
 #
 # The library-audit / research-audit / todo-hygiene stages are REAL from day
 # one (they mirror ci.yml's enforced jobs); the format/lint/build/test/smoke
-# stages are TODO placeholders until configure_project fills them — a PASS on
-# a placeholder stage verifies nothing.
+# stages report SKIP — loudly, with a summary count — until configure_project
+# fills them. A fresh copy is green but says exactly what it did NOT verify.
 #
 # Windows PowerShell 5.1 compatible (no &&, no ternary). Keep output strings
 # ASCII: PS 5.1 reads un-BOM'd .ps1 files as ANSI, so non-ASCII renders as mojibake.
@@ -25,7 +25,18 @@ param(
 Set-Location (Split-Path -Parent $PSScriptRoot)
 
 $script:Failed = $false
+$script:Skipped = 0
 $Watch = [System.Diagnostics.Stopwatch]::new()
+
+function Skip-Stage {
+    # An unconfigured placeholder: reports SKIP (counted in the summary) instead
+    # of a hollow PASS. configure_project replaces these with real Invoke-Stage bodies.
+    param([string]$Name, [string]$Reason)
+    if ($script:Failed) { return }
+    Write-Host "==> $Name" -ForegroundColor Cyan
+    Write-Host "SKIP  $Name ($Reason)" -ForegroundColor Yellow
+    $script:Skipped++
+}
 
 function Invoke-Stage {
     param([string]$Name, [scriptblock]$Body)
@@ -56,16 +67,16 @@ function Invoke-Stage {
     }
 }
 
-# --- The gates, in the same order as ci.yml. Replace the placeholders. ---
-Invoke-Stage 'format --check' { Write-Host 'TODO: format --check command (PROJECT_CONVENTIONS.md > Format / lint)' }
-Invoke-Stage 'lint (warnings as errors)' { Write-Host 'TODO: lint command' }
+# --- The gates, in the same order as ci.yml. configure_project replaces the Skip-Stage placeholders. ---
+Skip-Stage 'format --check' 'unconfigured - configure_project fills this stage (PROJECT_CONVENTIONS.md > Format / lint)'
+Skip-Stage 'lint (warnings as errors)' 'unconfigured - configure_project fills this stage'
 
 if (-not $Quick) {
-    Invoke-Stage 'build' { Write-Host 'TODO: build command' }
-    Invoke-Stage 'test' { Write-Host 'TODO: test command' }
+    Skip-Stage 'build' 'unconfigured - configure_project fills this stage'
+    Skip-Stage 'test' 'unconfigured - configure_project fills this stage'
     if (-not $SkipSmoke) {
         # The headless / CI-operability gate (validate_headless_mode). Drop if no run loop.
-        Invoke-Stage 'headless smoke' { Write-Host 'TODO: headless gate command' }
+        Skip-Stage 'headless smoke' 'unconfigured - configure_project fills this stage'
     }
 }
 
@@ -102,5 +113,10 @@ if ($script:Failed) {
     Write-Host 'PREFLIGHT: FAIL - do not push' -ForegroundColor Red
     exit 1
 }
-Write-Host 'PREFLIGHT: PASS - safe to push' -ForegroundColor Green
+if ($script:Skipped -gt 0) {
+    Write-Host "PREFLIGHT: PASS with $($script:Skipped) unconfigured stage(s) skipped - run configure_project to make them real" -ForegroundColor Yellow
+}
+else {
+    Write-Host 'PREFLIGHT: PASS - safe to push' -ForegroundColor Green
+}
 exit 0

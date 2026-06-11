@@ -1,8 +1,9 @@
 # CI — <PROJECT_NAME>
 # TEMPLATE: fill in the build / test / lint / gate commands from PROJECT_CONVENTIONS.md.
 # These jobs are the merge gate — they encode the definition_of_done gates that can run in CI.
-# Replace each `echo "TODO …"` placeholder with the real command, and the setup step with your toolchain's.
-# The library-audits and hygiene jobs are real and enforced from day one.
+# Replace each `echo "SKIP (unconfigured) …"` placeholder with the real command, and the setup
+# step with your toolchain's — until then those steps verify NOTHING (they say so in the log).
+# The library/research-audit, skills-structure, and hygiene jobs are real and enforced from day one.
 # Keep this file mirrored by scripts/preflight.{sh,ps1} — if you change one, change the other.
 name: CI
 
@@ -31,24 +32,24 @@ jobs:
       - uses: actions/checkout@v5
 
       # --- Toolchain setup: replace with your stack's setup action ---
-      # (The placeholder run values are YAML-quoted: an unquoted `echo "TODO: …"`
+      # (The placeholder run values are YAML-quoted: an unquoted `echo "SKIP: …"`
       # contains a colon-space, which YAML reads as a nested mapping — the
       # workflow file fails to parse and every run dies at startup in 0s.)
       - name: Set up toolchain
-        run: 'echo "TODO: set up the toolchain (see PROJECT_CONVENTIONS.md > Stack)"'
+        run: 'echo "SKIP (unconfigured): toolchain setup - configure_project fills this step (see PROJECT_CONVENTIONS.md > Stack)"'
 
       # --- Build (PROJECT_CONVENTIONS.md > Build & Test > Build) ---
       - name: Build
-        run: 'echo "TODO: build command"'
+        run: 'echo "SKIP (unconfigured): build command - configure_project fills this step"'
 
       # --- Test (PROJECT_CONVENTIONS.md > Build & Test > Test) ---
       - name: Test
-        run: 'echo "TODO: test command"'
+        run: 'echo "SKIP (unconfigured): test command - configure_project fills this step"'
 
       # --- The headless / operability gate (blocks merge). See validate_headless_mode. ---
       # Drop this step if the project has no run loop.
       - name: Headless smoke
-        run: 'echo "TODO: headless gate command (e.g. run N steps with no window/device)"'
+        run: 'echo "SKIP (unconfigured): headless gate command - configure_project fills this step"'
 
   lint:
     name: format & lint
@@ -56,17 +57,17 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Set up toolchain
-        run: 'echo "TODO: set up the toolchain"'
+        run: 'echo "SKIP (unconfigured): toolchain setup - configure_project fills this step"'
       - name: Format check
-        run: 'echo "TODO: format --check command"'
+        run: 'echo "SKIP (unconfigured): format --check command - configure_project fills this step"'
       - name: Lint
-        run: 'echo "TODO: lint command (warnings as errors)"'
+        run: 'echo "SKIP (unconfigured): lint command - configure_project fills this step"'
       # Optional: docs build as a merge gate (doc warnings as errors) — uncomment
       # if the stack has one (rustdoc / typedoc / sphinx …); a doc-warning gate
       # catches rot the moment it lands instead of at release. Mirror the command
       # into scripts/preflight.{sh,ps1} if you enable it.
       # - name: Docs (warnings as errors)
-      #   run: 'echo "TODO: docs build command"'
+      #   run: 'echo "SKIP (unconfigured): docs build command"'
 
   # Keeps the knowledge library honest on every push. The audit scripts exit
   # non-zero on any unresolved citation / failed routing case / broken link,

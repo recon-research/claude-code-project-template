@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # preflight.sh — every merge-blocking gate, locally, in CI order.
-# TEMPLATE: replace each `echo "TODO …"` stage body with the real command from
+# TEMPLATE: replace each `skip_stage` placeholder with a real `stage` body from
 # PROJECT_CONVENTIONS.md › Build & Test (the same commands .github/workflows/ci.yml
 # runs — keep the two mirrored: if you change one, change the other).
 #
@@ -11,8 +11,8 @@
 #
 # The library-audit / research-audit / todo-hygiene stages are REAL from day
 # one (they mirror ci.yml's enforced jobs); the format/lint/build/test/smoke
-# stages are TODO placeholders until configure_project fills them — a PASS on
-# a placeholder stage verifies nothing.
+# stages report SKIP — loudly, with a summary count — until configure_project
+# fills them. A fresh copy is green but says exactly what it did NOT verify.
 #
 # Flags: --quick (skip build/test/smoke; audits + hygiene always run) · --skip-smoke (skip the run-loop gate)
 set -u
@@ -29,6 +29,7 @@ for arg in "$@"; do
 done
 
 FAILED=0
+SKIPPED=0
 stage() {
     local name="$1"; shift
     [ "$FAILED" -ne 0 ] && return 0
@@ -41,17 +42,26 @@ stage() {
         FAILED=1
     fi
 }
+skip_stage() {
+    # An unconfigured placeholder: reports SKIP (counted in the summary) instead
+    # of a hollow PASS. configure_project replaces these with real `stage` bodies.
+    local name="$1"; shift
+    [ "$FAILED" -ne 0 ] && return 0
+    echo "==> $name"
+    echo "SKIP  $name ($*)"
+    SKIPPED=$((SKIPPED + 1))
+}
 
-# --- The gates, in the same order as ci.yml. Replace the echo placeholders. ---
-stage "format --check" echo "TODO: format --check command (PROJECT_CONVENTIONS.md > Format / lint)"
-stage "lint (warnings as errors)" echo "TODO: lint command"
+# --- The gates, in the same order as ci.yml. configure_project replaces the skip_stage placeholders. ---
+skip_stage "format --check" "unconfigured — configure_project fills this stage (PROJECT_CONVENTIONS.md > Format / lint)"
+skip_stage "lint (warnings as errors)" "unconfigured — configure_project fills this stage"
 
 if [ "$QUICK" -eq 0 ]; then
-    stage "build" echo "TODO: build command"
-    stage "test" echo "TODO: test command"
+    skip_stage "build" "unconfigured — configure_project fills this stage"
+    skip_stage "test" "unconfigured — configure_project fills this stage"
     if [ "$SKIP_SMOKE" -eq 0 ]; then
         # The headless / CI-operability gate (validate_headless_mode). Drop if no run loop.
-        stage "headless smoke" echo "TODO: headless gate command"
+        skip_stage "headless smoke" "unconfigured — configure_project fills this stage"
     fi
 fi
 
@@ -86,4 +96,8 @@ if [ "$FAILED" -ne 0 ]; then
     echo "PREFLIGHT: FAIL — do not push"
     exit 1
 fi
-echo "PREFLIGHT: PASS — safe to push"
+if [ "$SKIPPED" -gt 0 ]; then
+    echo "PREFLIGHT: PASS with $SKIPPED unconfigured stage(s) skipped — run configure_project to make them real"
+else
+    echo "PREFLIGHT: PASS — safe to push"
+fi

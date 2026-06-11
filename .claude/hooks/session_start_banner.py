@@ -35,17 +35,22 @@ def main():
         text = open("CLAUDE.md", encoding="utf-8", errors="replace").read()
     except Exception:
         return 0
-    m = re.search(r"As of:\*\*\s*([^·\n]+)·\s*([0-9a-fA-F]{7,40})", text)
+    # `?  — tolerate a markdown-backtick-wrapped sha in the Status line.
+    m = re.search(r"As of:\*\*\s*([^·\n]+)·\s*`?([0-9a-fA-F]{7,40})", text)
     if m:
         stamp_date, stamp_sha = m.group(1).strip(), m.group(2).strip()
         head = run(["git", "rev-parse", "--short", "HEAD"])
         if head:
-            behind = run(["git", "rev-list", "--count", f"{stamp_sha}..HEAD"])
+            # Exclude commits that touch only CLAUDE.md: the post-merge Status-stamp
+            # checkpoint is by construction one commit past the sha it stamps and must
+            # not read as staleness forever. A commit touching CLAUDE.md plus anything
+            # else still counts (it modifies other paths).
+            behind = run(["git", "rev-list", "--count", f"{stamp_sha}..HEAD", "--", ".", ":!CLAUDE.md"])
             if behind and behind != "0":
                 lines.append(f"[status-anchor] STALE: CLAUDE.md Status stamped {stamp_date} @ {stamp_sha}, "
-                             f"but HEAD is {head} ({behind} commit(s) later) -- reconcile Status first (onboard step 3).")
+                             f"but HEAD is {head} ({behind} non-checkpoint commit(s) later) -- reconcile Status first (onboard step 3).")
             else:
-                lines.append(f"[status-anchor] fresh: stamped {stamp_date} @ {stamp_sha} = HEAD.")
+                lines.append(f"[status-anchor] fresh: stamped {stamp_date} @ {stamp_sha} (no non-checkpoint commits since).")
     elif "<date" in text or "&lt;date" in text:
         lines.append("[status-anchor] Status block is still template placeholders -- run onboard Mode A.")
     decisions = run(["gh", "issue", "list", "--label", "decision", "--state", "open",

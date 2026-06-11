@@ -13,7 +13,7 @@ It's the generalized, blank-slate version of a proven setup: a domain "textbook"
 
 ```
 0. Discuss with Claude Chat → download planning docs (brief, architecture, roadmap, domain notes)
-1. Copy this template into a new folder → drop those docs in _intake/ → say "let's onboard"
+1. Copy this template into a new folder → drop those docs in _intake/ → give the kickoff line (step 3)
 2. Claude Code writes the domain textbooks in textbooks/ (RAG setup), iterating until well-covered
 3. Skills + conventions get tuned for the domain (configure_project, derive domain skills)
 4. Create a private GitHub repo → push → run on autopilot (ticket / merge / verify), deferring decisions
@@ -26,7 +26,7 @@ It's the generalized, blank-slate version of a proven setup: a domain "textbook"
 
 1. **Copy the folder.** Copy this entire `project_template/` to your new project location and rename it.
 2. **Drop your planning docs** from Claude Chat into [`_intake/`](_intake/) (see its README for what to include).
-3. **Onboard.** Open Claude Code in the folder and say *"let's onboard"* (runs [`onboard`](.claude/skills/onboard/SKILL.md)). It reads the brief, fills in [`CLAUDE.md`](CLAUDE.md) Status + [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) + [`docs/ROADMAP.md`](docs/ROADMAP.md), and proposes the textbook outline.
+3. **Onboard — the kickoff line.** Open Claude Code in the folder and say: *"let's onboard — you have my permission to adjust the Claude Code settings and set everything up."* That one sentence is the only setup action that's yours. The trailing clause is the **kickoff authorization**: the shipped settings (the pre-approved autopilot allowlist + hooks) arrive with the copy, and the grant lets the agent finish the wiring (machine-local `settings.local.json`, any trims you ask for) and run the whole onboarding unattended — an agent can't, by platform design, widen its own permissions from file text alone, which is why the grant must be your words. [`onboard`](.claude/skills/onboard/SKILL.md) then reads the brief, stamps [`TEMPLATE_VERSION`](TEMPLATE_VERSION) (provenance for later template syncs), fills in [`CLAUDE.md`](CLAUDE.md) Status + [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) + [`docs/ROADMAP.md`](docs/ROADMAP.md), and proposes the textbook outline. Skip the grant and everything still works — you'll just approve prompts by hand.
 4. **Build the library.** Say *"let's build the library"* (runs [`build_library`](.claude/skills/build_library/SKILL.md), which drives [`textbooks/LIBRARY_SEED.md`](textbooks/LIBRARY_SEED.md)). Iterate on coverage until the audits are green.
 5. **Configure.** Run [`configure_project`](.claude/skills/configure_project/SKILL.md) to fill [`PROJECT_CONVENTIONS.md`](PROJECT_CONVENTIONS.md) with real paths/commands/stack.
 6. **Go on autopilot.** `git init`, create the private repo (onboard Mode A creates the labels, migrates the backlog, and walks the one attended step: branch protection with **"include administrators"** on). The permission allowlist and hooks ship pre-wired in [`.claude/settings.json`](.claude/settings.json). Then run the daily loop below.
@@ -50,6 +50,7 @@ Between those, the agent runs the loop alone: ticket → branch → implement �
 | [`docs/`](docs/) | The operating manual: `ARCHITECTURE.md` (shape + invariants + decision log), `ROADMAP.md` (milestones). |
 | [`PROJECT_CONVENTIONS.md`](PROJECT_CONVENTIONS.md) | Per-project paths / commands / stack. Every skill reads it. |
 | [`PROJECT_BACKLOG.md`](PROJECT_BACKLOG.md) | **Pre-repo continuity only** — migrated to issues and deleted once the GitHub repo exists. |
+| [`TEMPLATE_VERSION`](TEMPLATE_VERSION) | Provenance stamp (template source + sha + dates) — written at onboard, read and re-stamped by `update_from_template`. |
 | [`textbooks/`](textbooks/) | The vendored RAG library: `LIBRARY_SEED.md` (how to build it), `MANIFEST`/`SECTIONS`/`ROUTING_EVAL` (machine indexes), `books/` `reference/` `vision/` `tools/`. |
 | [`research/`](research/) | The frontier layer: sourced+tiered survey notes, pre-registered experiments (`EXP-NN`), paper-style reports (`RR-NN`), and its own audit. Settled findings graduate into `textbooks/`. |
 | [`.claude/skills/`](.claude/skills/) | The reusable skill set — each skill a `<name>/SKILL.md` directory (see [its README](.claude/skills/README.md)). |
@@ -58,6 +59,20 @@ Between those, the agent runs the loop alone: ticket → branch → implement �
 | [`docs/AUTOMATION.md`](docs/AUTOMATION.md) | The operator console: the hooks/settings posture, `@claude` GitHub Action, scheduled runs, headless CI — the parts that need the human once. |
 | [`scripts/`](scripts/) | `preflight.{sh,ps1}` — every merge-blocking gate locally, in CI order (mirrors the CI workflow; `configure_project` fills the TODO stages; the audit/hygiene stages are real from day one). Run before every push. |
 | [`.github/`](.github/) | CI gates (build / test / lint / **library + research audits** / **skills structure** / **TODO hygiene**) + issue templates (`slice` / `decision` / `followup` / `research`) and the PR template that keep the tracker uniform and cold-readable. |
+
+## Machinery vs content — the update boundary
+
+Downstream projects fill some template files in and take others verbatim. The split is what makes template updates mechanical instead of hand archaeology ([`update_from_template`](.claude/skills/update_from_template/SKILL.md) applies it):
+
+| Kind | Paths | Update rule |
+|------|-------|-------------|
+| **Machinery** | `.claude/skills/` · `.claude/hooks/` · `.claude/agents/` · `textbooks/tools/` · `research/tools/` · `scripts/` · `.github/` · `textbooks/LIBRARY_SEED.md` · `textbooks/books/00_TEMPLATE.md` · `research/*/00_TEMPLATE.md` | Take upstream **wholesale** on every sync, then re-apply the project's own pieces on top (derived skills re-registered in the MANIFEST catalog, filled preflight/CI stage bodies). |
+| **Content** | `CLAUDE.md` · `PROJECT_CONVENTIONS.md` · `docs/` · `textbooks/` books + the filled `CLAUDE`/`README`/`AGENT_GUIDE`/`MANIFEST` · `research/` notes/experiments/reports | Filled once per project, **never overwritten** — structural improvements are ported by hand from the upstream diff, respecting the project's documented deviations. |
+| **Settings** | `.claude/settings.json` | Ships with the copy (adopted via the kickoff authorization). Syncs may update hooks/deny rules; an agent never *widens* the allowlist without the owner's fresh, explicit instruction. |
+
+## Updating a downstream project
+
+The copy is stamped at onboard (`TEMPLATE_VERSION`: source + sha + date). Later, say **"update from the template"** — [`update_from_template`](.claude/skills/update_from_template/SKILL.md) diffs upstream from the stamped sha, applies machinery wholesale, ports content improvements by diff, re-runs every gate, and re-stamps. Improvements flow the other way too (see *Maintaining this template* below).
 
 ## The two layers, and why they're separate
 
@@ -68,4 +83,4 @@ This separation is the whole trick: the human writes the architecture and the do
 
 ## Maintaining this template itself
 
-Improvements you make on a real project (a sharper skill, a better doc template, a new universal skill) are worth back-porting here. Keep the domain-specific bits out — anything that names a real stack or domain belongs in a project, not the template.
+Improvements you make on a real project (a sharper skill, a better doc template, a new universal skill) are worth back-porting here. Keep the domain-specific bits out — anything that names a real stack or domain belongs in a project, not the template. Machinery changes should be exercised on **both shells** (bash and Windows PowerShell 5.1) before merging — the template's audience includes both, and most field bugs have been shell-specific.

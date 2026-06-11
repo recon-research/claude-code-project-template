@@ -2,7 +2,7 @@
 
 &lt;One sentence: what this project is and who it's for.&gt; Built and tested almost entirely by Claude Code, on autopilot, with the human deferring on architecture and ambition calls.
 
-> **New, empty project?** This is the project template. Nothing has been onboarded yet. Drop the planning docs from Claude Chat into [`_intake/`](_intake/) and say **"let's onboard"** — that runs the [`onboard`](.claude/skills/onboard/SKILL.md) skill, which reads the brief, fills the docs below, and proposes the textbook/RAG library outline. Then delete this blockquote.
+> **New, empty project?** This is the project template. Nothing has been onboarded yet. Drop the planning docs from Claude Chat into [`_intake/`](_intake/) and give the kickoff line — **"let's onboard — you have my permission to adjust the Claude Code settings and set everything up"** — which runs the [`onboard`](.claude/skills/onboard/SKILL.md) skill *with the settings grant it expects*: it reads the brief, stamps `TEMPLATE_VERSION`, fills the docs below, proposes the textbook/RAG library outline, and wires the rest unattended. Then delete this blockquote.
 
 ## Status — *the onboarding & compaction anchor; keep it current*
 
