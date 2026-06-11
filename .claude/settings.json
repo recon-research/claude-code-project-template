@@ -1,5 +1,5 @@
 {
-  "$comment": "Shared Claude Code settings. The allowlist exists for unattended autopilot runs: a permission prompt mid-run can stall the agent for hours, so the whole ticket->branch->implement->PR->merge loop is pre-approved (read-only git/gh, tracker writes, branch/commit/push, PR create+merge, preflight, the library/research audits). Explicitly approved by the project owner. It deliberately omits gh repo edit/delete, gh api, and arbitrary shell. Trim entries to re-insert manual gates (e.g. remove 'gh pr merge' to approve merges yourself). The deny rules are tripwires for the policy-forbidden forms (PROJECT_CONVENTIONS.md > Merge policy); the prefix grammar cannot catch every flag position, so branch protection with 'include administrators' is the real guard. Hooks (both fail-open; see docs/AUTOMATION.md): block_naked_todos denies `git commit` while the staged diff adds a naked TODO/FIXME; session_start_banner injects Status-staleness + the open decision queue at session start and after compaction. Machine-specific grants belong in settings.local.json (gitignored).",
+  "$comment": "Shared Claude Code settings. The allowlist exists for unattended autopilot runs: a permission prompt mid-run can stall the agent for hours, so the ticket->branch->preflight->PR->merge loop is pre-approved (read git/gh, tracker writes, branch/commit/push, PR create+checks+merge, preflight, the library/research audits) — in BOTH shell tools, because on native Windows the agent issues commands through PowerShell, and a Bash-only allowlist prompts on every step. Owner-approved 2026-06-10 (template issue #8). HONEST LIMITATION: Claude Code matches by command PREFIX, so the broad entries cannot exclude a destructive flag supplied as a LATER argument — 'git push origin --force', 'git push origin main', 'git branch -D', 'git switch --discard-changes' are all reachable under these patterns, and the deny tripwires below catch only the canonical flag-first spellings. Those forms are forbidden by the written policy (PROJECT_CONVENTIONS.md > Merge policy), and the MECHANICAL guard is branch protection with 'include administrators' — which GitHub only enforces on public repos or paid plans; on a free-plan private repo the prose policy plus these narrowed grants are the only guard (docs/AUTOMATION.md s5). Deliberately NOT pre-approved: 'gh api', 'gh repo' edit/delete, 'git commit' via PowerShell (commits route through the Bash here-doc path — conventions > PR / commit mechanics), destructive git (rm, stash, reset --hard, clean, checkout --, worktree remove), and arbitrary shell. To re-gate a step, remove its line(s) (e.g. the 'pr merge' lines to approve merges yourself). Machine-specific spellings (e.g. a full path to gh.exe) belong in settings.local.json (gitignored), not here. Hooks (fail-open; docs/AUTOMATION.md s1): block_naked_todos denies 'git commit' while the staged diff adds a naked TODO/FIXME — matcher covers Bash AND PowerShell; session_start_banner injects Status-staleness + the open decision queue at startup/resume/clear and after compaction. The braced ${CLAUDE_PROJECT_DIR} placeholder is substituted by Claude Code itself, so the wiring works regardless of which shell runs the hook.",
   "permissions": {
     "allow": [
       "Bash(git status:*)",
@@ -9,16 +9,18 @@
       "Bash(git fetch:*)",
       "Bash(git pull:*)",
       "Bash(git add:*)",
-      "Bash(git rm:*)",
       "Bash(git mv:*)",
       "Bash(git commit:*)",
       "Bash(git branch:*)",
-      "Bash(git checkout:*)",
+      "Bash(git checkout -b:*)",
       "Bash(git switch:*)",
       "Bash(git merge:*)",
-      "Bash(git push:*)",
-      "Bash(git stash:*)",
-      "Bash(git worktree:*)",
+      "Bash(git push -u origin:*)",
+      "Bash(git push origin:*)",
+      "Bash(git remote prune origin)",
+      "Bash(git worktree add:*)",
+      "Bash(git worktree list)",
+      "Bash(git worktree prune)",
       "Bash(gh auth status:*)",
       "Bash(gh issue list:*)",
       "Bash(gh issue view:*)",
@@ -45,34 +47,84 @@
       "Bash(python textbooks/tools/_audit:*)",
       "Bash(python research/tools/_audit_research.py:*)",
       "Bash(scripts/preflight.sh:*)",
-      "Bash(bash scripts/preflight.sh:*)"
+      "Bash(bash scripts/preflight.sh:*)",
+
+      "PowerShell(git status:*)",
+      "PowerShell(git diff:*)",
+      "PowerShell(git log:*)",
+      "PowerShell(git show:*)",
+      "PowerShell(git fetch:*)",
+      "PowerShell(git pull:*)",
+      "PowerShell(git add:*)",
+      "PowerShell(git mv:*)",
+      "PowerShell(git branch:*)",
+      "PowerShell(git checkout -b:*)",
+      "PowerShell(git switch:*)",
+      "PowerShell(git merge:*)",
+      "PowerShell(git push -u origin:*)",
+      "PowerShell(git push origin:*)",
+      "PowerShell(git remote prune origin)",
+      "PowerShell(git worktree add:*)",
+      "PowerShell(git worktree list)",
+      "PowerShell(git worktree prune)",
+      "PowerShell(gh auth status:*)",
+      "PowerShell(gh issue list:*)",
+      "PowerShell(gh issue view:*)",
+      "PowerShell(gh issue create:*)",
+      "PowerShell(gh issue edit:*)",
+      "PowerShell(gh issue comment:*)",
+      "PowerShell(gh issue close:*)",
+      "PowerShell(gh issue reopen:*)",
+      "PowerShell(gh label create:*)",
+      "PowerShell(gh label list:*)",
+      "PowerShell(gh pr list:*)",
+      "PowerShell(gh pr view:*)",
+      "PowerShell(gh pr create:*)",
+      "PowerShell(gh pr checks:*)",
+      "PowerShell(gh pr diff:*)",
+      "PowerShell(gh pr comment:*)",
+      "PowerShell(gh pr merge:*)",
+      "PowerShell(gh run list:*)",
+      "PowerShell(gh run view:*)",
+      "PowerShell(gh run watch:*)",
+      "PowerShell(python tools/_gen_sections.py:*)",
+      "PowerShell(python tools/_audit:*)",
+      "PowerShell(python textbooks/tools/_gen_sections.py:*)",
+      "PowerShell(python textbooks/tools/_audit:*)",
+      "PowerShell(python research/tools/_audit_research.py:*)",
+      "PowerShell(scripts\\preflight.ps1:*)",
+      "PowerShell(.\\scripts\\preflight.ps1:*)",
+      "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\preflight.ps1:*)"
     ],
     "deny": [
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
-      "Bash(gh pr merge --admin:*)"
+      "Bash(gh pr merge --admin:*)",
+      "PowerShell(git push --force:*)",
+      "PowerShell(git push -f:*)",
+      "PowerShell(gh pr merge --admin:*)"
     ]
   },
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "Bash|PowerShell",
         "hooks": [
-          { "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/block_naked_todos.py\"" }
+          { "type": "command", "command": "python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/block_naked_todos.py\"" }
         ]
       }
     ],
     "SessionStart": [
       {
-        "matcher": "startup|resume",
+        "matcher": "startup|resume|clear",
         "hooks": [
-          { "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_start_banner.py\"" }
+          { "type": "command", "command": "python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session_start_banner.py\"" }
         ]
       },
       {
         "matcher": "compact",
         "hooks": [
-          { "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_start_banner.py\"" }
+          { "type": "command", "command": "python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session_start_banner.py\"" }
         ]
       }
     ]

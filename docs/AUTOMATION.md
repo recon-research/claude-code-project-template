@@ -8,8 +8,8 @@ Two hook scripts in [`.claude/hooks/`](../.claude/hooks/), wired in [`settings.j
 
 | Hook | Event | What it does |
 |---|---|---|
-| [`block_naked_todos.py`](../.claude/hooks/block_naked_todos.py) | `PreToolUse` (Bash) | Blocks `git commit` while the staged diff adds a naked TODO/FIXME — local CI parity at the moment of commit, zero tokens. Blocking hooks take precedence over the allowlist, so the pre-approved `git commit:*` can't bypass it. |
-| [`session_start_banner.py`](../.claude/hooks/session_start_banner.py) | `SessionStart` (startup\|resume + compact) | Injects a 1–3 line banner: Status-anchor staleness (As-of sha vs HEAD) + the open decision queue. The `compact` matcher re-grounds the agent right after a surprise compaction. ~100 tokens. |
+| [`block_naked_todos.py`](../.claude/hooks/block_naked_todos.py) | `PreToolUse` (Bash\|PowerShell) | Blocks `git commit` while the staged diff adds a naked TODO/FIXME — local CI parity at the moment of commit, zero tokens. Blocking hooks take precedence over the allowlist, so the pre-approved `git commit:*` can't bypass it. The matcher covers **both shell tools** — on native Windows the agent commits via PowerShell, and a Bash-only matcher silently never fires. |
+| [`session_start_banner.py`](../.claude/hooks/session_start_banner.py) | `SessionStart` (startup\|resume\|clear + compact) | Injects a 1–3 line banner: Status-anchor staleness (As-of sha vs HEAD) + the open decision queue. The `compact` matcher re-grounds the agent right after a surprise compaction; `clear` covers post-`/clear` windows, which start just as blank. ~100 tokens. |
 
 Hook config is snapshotted at session start — edits take effect next session (or after review via `/hooks`). Don't add a **blocking** PreCompact hook — wedging compaction at full context is worse than anything it could check.
 
@@ -17,9 +17,9 @@ Hook config is snapshotted at session start — edits take effect next session (
 
 What the committed file carries, and why:
 
-- **allow** — the full autopilot loop: read-only git/gh, tracker writes, branch/commit/push, PR create+merge, `scripts/preflight.sh` (the most frequent loop command), and the library/research audits (cwd-independent, so both root-relative and in-dir spellings work).
-- **deny** — tripwires for the policy-forbidden forms: `git push --force` / `-f`, `gh pr merge --admin`. The prefix grammar can't catch every flag position (e.g. `gh pr merge 12 --admin` slips the prefix), so these are seatbelts, not the guard — the guard is branch protection with **"include administrators"** (§5) plus the written policy (`PROJECT_CONVENTIONS.md` › Merge policy).
-- **hooks** — §1, via `$CLAUDE_PROJECT_DIR` so they work from any launch directory.
+- **allow** — the full autopilot loop in **both shell tools** (Bash *and* PowerShell — on native Windows the agent runs PowerShell, and an un-mirrored allowlist prompts at every step): read git/gh, tracker writes, branch/commit/push, PR create+checks+merge, `scripts/preflight.{sh,ps1}`, and the library/research audits (cwd-independent, so both root-relative and in-dir spellings work). The git grants are **narrowed** to the loop's actual shapes: `checkout -b` (not bare `checkout`, which would pre-approve `checkout -- .` discards), `push -u origin` / `push origin` (not bare `push`), `worktree add/list/prune` (not `remove`); `git rm` and `git stash` are deliberately absent (rescue-branch, don't stash), and PowerShell gets **no `git commit`** — commits route through the Bash here-doc path (conventions › PR / commit mechanics).
+- **deny** — tripwires for the policy-forbidden forms in both shells: `git push --force` / `-f`, `gh pr merge --admin`. The prefix grammar can't catch every flag position (`git push origin --force`, `gh pr merge 12 --admin` slip the prefixes), so these are seatbelts, not the guard — the guard is branch protection with **"include administrators"** where the plan enforces it (§5, including the free-tier caveat) plus the written policy (`PROJECT_CONVENTIONS.md` › Merge policy).
+- **hooks** — §1, via the braced `${CLAUDE_PROJECT_DIR}` placeholder, which Claude Code substitutes itself before any shell parses the command — so the wiring is shell-independent and works from any launch directory (the unbraced form relied on POSIX expansion and could invert the fail-open design into a fail-closed block on Windows).
 - **Optional, not set:** `fallbackModel` — fallback model(s) tried when the primary is unavailable (changelog v2.1.166) — would keep an overnight run alive through an availability blip. Verify the current key shape in the docs before adding. `[published]`
 
 ## 3. `@claude` GitHub Actions — answer decision issues from your phone `[production-proven]`

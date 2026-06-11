@@ -89,7 +89,7 @@ Invoke-Stage 'todo hygiene (vs origin/main)' {
     # Mirrors ci.yml's hygiene job (same pathspecs, same regex - change both together).
     $null = git rev-parse --verify -q origin/main
     if ($LASTEXITCODE -ne 0) { $global:LASTEXITCODE = 0; Write-Host '(no origin/main yet - skipped)'; return }
-    $diffLines = git diff origin/main...HEAD -- . ':!*.md' ':!.github' ':!textbooks' ':!scripts/preflight.sh' ':!scripts/preflight.ps1' ':!.claude/hooks'
+    $diffLines = git diff origin/main...HEAD -- . ':!*.md' ':!.github' ':!textbooks' ':!scripts/preflight.sh' ':!scripts/preflight.ps1' ':!.claude'
     $naked = @($diffLines | Where-Object { $_ -match '^\+' -and $_ -notmatch '^\+\+\+' -and $_ -match '(?i)\b(todo|fixme)\b(?!\(#\d+\))' })
     if ($naked.Count -gt 0) {
         $naked | ForEach-Object { Write-Host $_ }
