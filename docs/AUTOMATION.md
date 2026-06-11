@@ -13,7 +13,9 @@ Two hook scripts in [`.claude/hooks/`](../.claude/hooks/), wired in [`settings.j
 
 Hook config is snapshotted at session start — edits take effect next session (or after review via `/hooks`). Don't add a **blocking** PreCompact hook — wedging compaction at full context is worse than anything it could check.
 
-## 2. The `settings.json` posture *(wired — owner-approved 2026-06-10)*
+## 2. The `settings.json` posture *(ships with the template — adopted by the kickoff authorization)*
+
+**Approval model:** the allowlist arrives with the copy; the README's one-sentence kickoff line (*"…you have my permission to adjust the Claude Code settings and set everything up"*) is the downstream owner's adoption of it, plus permission for setup-time adjustments (machine-local `settings.local.json`, requested trims). An agent must never **widen** the allowlist beyond the shipped form on its own — platform safety blocks agent-authored permission widening as self-modification, by design; a fresh, explicit owner instruction in chat is the only path.
 
 What the committed file carries, and why:
 

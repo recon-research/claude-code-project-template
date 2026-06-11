@@ -18,6 +18,7 @@ Drop-in procedures Claude Code follows when invoked (or when a request matches a
 | Skill | When |
 |-------|------|
 | [configure_project](configure_project/SKILL.md) | Inspect the repo → fill `PROJECT_CONVENTIONS.md`. |
+| [update_from_template](update_from_template/SKILL.md) | "update from the template" — pull upstream improvements: machinery wholesale, content by diff, re-stamp `TEMPLATE_VERSION`. |
 | [plan_work](plan_work/SKILL.md) | "plan" / "design" / "what approach" — library-grounded plan; the planning front-end. |
 | [plan_milestone_tickets](plan_milestone_tickets/SKILL.md) | Milestone start — refine the epic into grounded, dependency-ordered slice tickets (the horizon rule). |
 | [review_against_library](review_against_library/SKILL.md) | "audit this design vs the library" — cited Must-fix/Consider; `--fix` applies mechanical fixes. |

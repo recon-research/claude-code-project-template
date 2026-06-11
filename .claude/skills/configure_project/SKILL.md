@@ -15,14 +15,14 @@ Run once to adapt the drop-in skills to *this* project. It detects the build sys
 4. **Detect conventions.** Units / coordinate system (if applicable and discoverable), naming style, and any reflection / codegen mechanism.
 5. **Find agent tooling.** MCP server name(s), the CI system, the headless / validate gate command.
 6. **Write PROJECT_CONVENTIONS.md.** Fill every field you detected; leave a clearly-marked `<TODO>` for anything you couldn't, and tell the user which lines need confirmation.
-7. **Make the gates real.** Fill the TODO stage bodies in `scripts/preflight.sh`, `scripts/preflight.ps1`, **and** `.github/workflows/ci.yml` from the detected commands — the three are mirrors; change all or none. Then delete the two preflight-script exemptions from ci.yml's `hygiene` job, and run `scripts/preflight.*` to prove the stages actually execute. A TODO placeholder stage PASSes while verifying nothing — until this step, "main is green" is vacuous.
+7. **Make the gates real.** Replace the `skip_stage` / `Skip-Stage` placeholder stages in `scripts/preflight.sh`, `scripts/preflight.ps1`, **and** the `SKIP (unconfigured)` steps in `.github/workflows/ci.yml` with the detected commands — the three are mirrors; change all or none. Then delete the two preflight-script exemptions from ci.yml's `hygiene` job, and run `scripts/preflight.*` to prove the stages actually execute (its summary must report **0 skipped**). Until this step, a green run verifies only the audits — the SKIP lines say so.
 8. **Confirm with the user** the project name and anything ambiguous before the other skills rely on it.
 
 ## Verification
 
 - `PROJECT_CONVENTIONS.md` exists and every field is either filled or marked `<TODO>`.
 - The build / test commands you recorded actually run.
-- `scripts/preflight.*` and `ci.yml` contain no TODO placeholder stages if the repo has real code; preflight executes end-to-end.
+- `scripts/preflight.*` and `ci.yml` contain no unconfigured SKIP-placeholder stages if the repo has real code; preflight executes end-to-end and reports 0 skipped.
 - No example default left in place that doesn't match this project (especially the project name).
 
 ## Don't
