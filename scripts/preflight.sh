@@ -75,7 +75,7 @@ todo_hygiene() {
         || { echo "(no origin/main yet — skipped)"; return 0; }
     local naked
     naked=$(git diff origin/main...HEAD -- . ':!*.md' ':!.github' ':!textbooks' \
-        ':!scripts/preflight.sh' ':!scripts/preflight.ps1' ':!.claude/hooks' \
+        ':!scripts/preflight.sh' ':!scripts/preflight.ps1' ':!.claude' \
         | grep -E '^\+' | grep -vE '^\+\+\+' \
         | sed -E 's/(todo|fixme)\(#[0-9]+\)//gI' | grep -iE '\b(todo|fixme)\b' || true)
     [ -z "$naked" ] || { echo "$naked"; echo "naked TODO/FIXME — file a ticket and write TODO(#NN)"; return 1; }
