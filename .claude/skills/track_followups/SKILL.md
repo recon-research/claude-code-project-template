@@ -10,7 +10,7 @@ The failure mode this kills: the agent says "we'll get to X later," doesn't writ
 ## When (in order of importance)
 
 1. **Mid-task, at the moment of deferral** — the instant you think "later / out of scope": file it (≤2 minutes), then continue the task. Don't batch deferrals for session end; session end is exactly what compaction eats.
-2. **A TODO is about to enter code** — file the ticket *first*, then write `TODO(#NN): …`. A naked TODO/FIXME fails `definition_of_done` and the CI hygiene job.
+2. **A TODO is about to enter code** — file the ticket *first*, then write `TODO(#NN): …`. A naked TODO/FIXME fails `definition_of_done` and the CI hygiene gate (a `static gates` step).
 3. **Review deferred a finding** (`adversarial_review`'s DEFER set, `/code-review` notes) — one issue per finding.
 4. **An idea worth keeping** (yours or the human's) — label `idea`. Ideas are cheap to file and expensive to lose.
 5. **Sweep** — inside `prepare_compaction`, and before closing any issue/epic with known leftovers. If the sweep finds anything, treat it as a near-miss: it should have been filed at moment-of-deferral.

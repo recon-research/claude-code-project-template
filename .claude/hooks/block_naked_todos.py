@@ -1,6 +1,6 @@
 # PreToolUse hook (matcher: Bash|PowerShell): blocks `git commit` while the
 # STAGED diff adds a naked TODO/FIXME — the zero-token local twin of ci.yml's
-# hygiene job (same exemptions, same per-occurrence rule). Blocking-hook
+# hygiene step (in `static gates`; same exemptions, same rule). Blocking-hook
 # decisions take precedence over the allowlist, so the pre-approved
 # `git commit:*` grant can't bypass this. The matcher (and the tool_name check
 # below) must cover BOTH shell tools: on native Windows the agent issues git
