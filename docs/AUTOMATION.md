@@ -1,6 +1,6 @@
 # AUTOMATION.md — The Operator Console
 
-The automation surfaces beyond the core loop. §1–2 are **already wired** in this template; §3–5 **require the human once** (credentials/UI). Standing rule either way: `.claude/settings.json` is permission machinery — the agent only changes it on your explicit, in-your-own-words instruction. Each item is tiered like a research note. Lazy-read: nothing here loads into sessions.
+The automation surfaces beyond the core loop. §1–2 and §6 are **already wired** in this template (§6 defaults to the `light` CI posture); §3–5 **require the human once** (credentials/UI). Standing rule either way: `.claude/settings.json` is permission machinery — the agent only changes it on your explicit, in-your-own-words instruction. Each item is tiered like a research note. Lazy-read: nothing here loads into sessions.
 
 ## 1. Hooks — zero-token mechanical gates `[production-proven]` *(wired)*
 
@@ -57,6 +57,26 @@ jobs:
 
 ## 5. Branch protection (repo setup, attended)
 
-Require PRs + the CI checks **and enable "include administrators"** — without it, `gh pr merge --admin` (inside the pre-approved `gh pr merge:*` grant) bypasses every gate. `onboard` Mode A marks this step attended; `gh api` is deliberately not pre-approved.
+Require PRs + the CI checks **and enable "include administrators"** — without it, `gh pr merge --admin` (inside the pre-approved `gh pr merge:*` grant) bypasses every gate. `onboard` Mode A marks this step attended; `gh api` is deliberately not pre-approved. **Which checks to require depends on the CI posture (§6):** in `light`, require only `static gates` — the heavy jobs are posture-skipped, and a skipped job satisfies a required check, but a job whose workflow never runs sits "Expected" forever and blocks the PR; in `manual`, require no checks (the pasted preflight is the gate).
 
 **Free-tier caveat (hard-won):** on a free-plan **private** repo GitHub does not enforce branch protection or rulesets at all — the protection UI exists but the rules don't bind. Mechanical enforcement requires GitHub Pro, an org plan, or making the repo public. Until then the written merge policy (`PROJECT_CONVENTIONS.md`) plus the allowlist's narrowed grants are the *only* guard — treat the settings.json `$comment`'s honesty about prefix-matching holes as load-bearing, and revisit protection the moment the repo's plan or visibility changes.
+
+## 6. CI minutes & pacing — the posture system `[production-proven]` *(wired — `light` by default)*
+
+**The burn problem.** GitHub-hosted runners are free on **public** repos; private repos draw from the plan's monthly pool — **Free: 2,000 min, Pro: 3,000 min** — and Windows runners bill ~1.7× Linux ($0.010 vs $0.006/min) (https://docs.github.com/en/billing/concepts/product-billing/github-actions, accessed 2026-06-12). The pre-posture workflow (6 jobs × 2 OSes, every PR push **and** every main push) billed several minutes per push; field report 2026-06-12: a downstream private copy burned ~2,000 min in one week — a whole month's Free pool. Public repos never feel this, which is exactly why a template developed on a public repo didn't.
+
+**The fix: one repo variable.** `ci.yml` reads `CI_POSTURE` (unset = `light`); set it with `gh variable set CI_POSTURE --body <light|full|manual>`. Variables are readable in job-level `if:` expressions, and an unset variable evaluates to the empty string — which is what makes "unset = light" work (https://docs.github.com/en/actions/learn-github-actions/variables, accessed 2026-06-12).
+
+| Posture | What runs automatically | Typical burn | Pick when |
+|---|---|---|---|
+| `light` *(default)* | one consolidated `static gates` job per PR — library + research audits, skills structure, TODO hygiene (ubuntu, ~1 min) | ~5–15 min/day | private repo on Free/Pro — the recommended default |
+| `full` | static gates + build/test matrix + lint, every PR and main push | ~100–150 min/day | public repo (minutes free), org pool, or self-hosted runner |
+| `manual` | nothing | 0 | zero budget; a clean preflight pasted in the PR is the gate |
+
+Escalation in **any** posture: label a PR **`full-ci`** (heavy matrix for that PR — the label event re-triggers the run) · **`gh workflow run ci.yml`** (one full run) · push an **`M*`/`v*` milestone tag** (milestone exits always re-verify everything). Pacing changes *when CI re-verifies*, never *what must pass*: `scripts/preflight.{sh,ps1}` runs every gate locally before every push in every posture, and `definition_of_done` still collects the evidence. The consolidation is itself part of the savings — split into four jobs, the same ~90s of audit work bills four runners' checkout + setup time.
+
+**Why job-level `if:` and not `on:` filters** (load-bearing): a job skipped by its `if` conditional reports its status as "Success" — required checks stay satisfied — while a workflow skipped by path/branch filtering leaves its required checks "Pending" and **blocks the PR from merging forever** (https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks, accessed 2026-06-12). Consequence for §5: in `light`, require **only `static gates`**; require the heavy jobs only in `full`.
+
+**Self-hosted runner — `full` posture at zero minutes** (the power option for an always-on spare box): repo Settings → Actions → Runners → "New self-hosted runner", run GitHub's installer on the spare machine (as a service for unattended), then retarget jobs — `runs-on: [self-hosted, Linux]`, or swap the matrix entries. Self-hosted runners "are free to use with GitHub Actions, but you are responsible for the cost of maintaining your runner machines" (https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/about-self-hosted-runners, accessed 2026-06-12). **Security boundary: "Self-hosted runners should almost never be used for public repositories"** — any fork PR can execute code on your machine (https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions, accessed 2026-06-12). A private autopilot repo is the natural fit.
+
+The posture is chosen at onboarding by the setup interview (`onboard` Mode A) and recorded in `PROJECT_CONVENTIONS.md` › Operating posture. This template repo itself runs the unset-`light` default — it's public (minutes free either way), but it dogfoods the configuration downstream copies inherit.

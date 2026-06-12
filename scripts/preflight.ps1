@@ -5,6 +5,9 @@
 #
 # Run before EVERY push. A clean preflight means CI should be green; a red CI
 # after a clean preflight is environmental (read the log, don't guess).
+# The CI posture (PROJECT_CONVENTIONS.md > Operating posture) paces when CI
+# re-runs these gates; preflight always runs ALL of them, in every posture --
+# in light/manual postures this script IS the heavy-gate evidence.
 # (POSIX equivalent: scripts/preflight.sh.)
 #
 # The library-audit / research-audit / todo-hygiene stages are REAL from day
@@ -80,7 +83,7 @@ if (-not $Quick) {
     }
 }
 
-# --- Real-from-day-one gates (mirror ci.yml's library-audits / research-audits / hygiene jobs) ---
+# --- Real-from-day-one gates (mirror ci.yml's consolidated `static gates` job) ---
 Invoke-Stage 'library audits' {
     python textbooks/tools/_gen_sections.py
     if ($LASTEXITCODE -ne 0) { return }
@@ -97,7 +100,7 @@ Invoke-Stage 'library audits' {
 Invoke-Stage 'research audit' { python research/tools/_audit_research.py }
 
 Invoke-Stage 'todo hygiene (vs origin/main)' {
-    # Mirrors ci.yml's hygiene job (same pathspecs, same regex - change both together).
+    # Mirrors ci.yml's hygiene step (same pathspecs, same regex - change both together).
     $null = git rev-parse --verify -q origin/main
     if ($LASTEXITCODE -ne 0) { $global:LASTEXITCODE = 0; Write-Host '(no origin/main yet - skipped)'; return }
     $diffLines = git diff origin/main...HEAD -- . ':!*.md' ':!.github' ':!textbooks' ':!scripts/preflight.sh' ':!scripts/preflight.ps1' ':!.claude'

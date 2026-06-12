@@ -7,7 +7,7 @@ description: Run the system with no window, audio device, or input hardware; ass
 
 ## When To Use
 
-Applies to any system with a **run loop** — always, in CI, on every PR. The library names "untested headless path" as one of the most common ways a system that should run unattended ships broken: anything that *can* assume a window, audio device, controller, or interactive human *will* eventually do so, and only a continuously-exercised headless path keeps it CI- and agent-operable. Route to the relevant book(s) via the library (MANIFEST) for the headless / parallel-environment patterns. Read the CI system and the headless gate command from `PROJECT_CONVENTIONS.md`.
+Applies to any system with a **run loop** — always: locally via preflight before every push, and in CI per the posture (the heavy matrix exercises it on `full` PRs, `full-ci` escalations, and milestone tags). The library names "untested headless path" as one of the most common ways a system that should run unattended ships broken: anything that *can* assume a window, audio device, controller, or interactive human *will* eventually do so, and only a continuously-exercised headless path keeps it CI- and agent-operable. Route to the relevant book(s) via the library (MANIFEST) for the headless / parallel-environment patterns. Read the CI system and the headless gate command from `PROJECT_CONVENTIONS.md`.
 
 ## Procedure
 

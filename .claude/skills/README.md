@@ -9,7 +9,7 @@ Drop-in procedures Claude Code follows when invoked (or when a request matches a
 | Skill | When |
 |-------|------|
 | [onboard](onboard/SKILL.md) | "welcome back" / "let's onboard and continue" — start or resume a session. |
-| [ship_pr](ship_pr/SKILL.md) | "ship it" / "land this" — the PR-gated path to main: preflight → PR → green CI → merge → checkpoint. |
+| [ship_pr](ship_pr/SKILL.md) | "ship it" / "land this" — the PR-gated path to main: preflight → PR → merge gate (per CI posture) → merge → checkpoint. |
 | [prepare_compaction](prepare_compaction/SKILL.md) | "let's prepare for compaction" — checkpoint to the docs + tracker before context is lost. |
 | [build_library](build_library/SKILL.md) | "build the library" / "write the textbooks" — author/extend `textbooks/`. |
 

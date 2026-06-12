@@ -1,32 +1,158 @@
 # CI — <PROJECT_NAME>
 # TEMPLATE: fill in the build / test / lint / gate commands from PROJECT_CONVENTIONS.md.
-# These jobs are the merge gate — they encode the definition_of_done gates that can run in CI.
-# Replace each `echo "SKIP (unconfigured) …"` placeholder with the real command, and the setup
-# step with your toolchain's — until then those steps verify NOTHING (they say so in the log).
-# The library/research-audit, skills-structure, and hygiene jobs are real and enforced from day one.
-# Keep this file mirrored by scripts/preflight.{sh,ps1} — if you change one, change the other.
+# These jobs encode the definition_of_done gates that can run in CI. Replace each
+# `echo "SKIP (unconfigured) …"` placeholder with the real command, and the setup
+# step with your toolchain's — until then those steps verify NOTHING (they say so
+# in the log). The `static gates` job is real and enforced from day one.
+#
+# ── CI posture — minutes-aware pacing (docs/AUTOMATION.md §6) ────────────────
+# Private repos draw Actions minutes from the plan's monthly pool (Free 2,000 /
+# Pro 3,000; Windows bills ~1.7× Linux) — an autopilot loop running everything on
+# every push empties that in days. Pacing is controlled by ONE repo variable:
+#
+#   gh variable set CI_POSTURE --body <light|full|manual>      (unset = light)
+#
+#   light  (default) — only `static gates` runs, per PR (~1 min: library/research
+#          audits, skills structure, TODO hygiene). Heavy jobs run on demand.
+#   full   — everything on every PR + main push. For public repos (minutes are
+#          free there), paid pools, or self-hosted runners.
+#   manual — nothing automatic; escalation paths only. A clean local preflight
+#          pasted into the PR is the merge gate.
+#
+# Escalation in ANY posture: label a PR `full-ci` (heavy matrix for that PR) ·
+# `gh workflow run ci.yml` (one full run) · push an `M*`/`v*` milestone tag.
+#
+# Posture gating is job-level `if:` ON PURPOSE: a job skipped by its conditional
+# reports "Success" and SATISFIES required status checks, while workflow-level
+# path/branch filters leave required checks "Pending" and block the PR forever.
+# Don't "simplify" these conditions into `on:` filters. In light posture make
+# `static gates` the only required check (docs/AUTOMATION.md §6).
+#
+# scripts/preflight.{sh,ps1} always runs EVERY gate locally regardless of posture
+# — pacing changes when CI re-verifies, never what must pass. Keep the commands
+# here mirrored with preflight (change one → change the other).
 name: CI
 
-# PRs carry the merge gate; the push trigger is restricted to main so each PR
-# commit runs ONCE (an unrestricted push + pull_request pair runs everything
-# twice). The main-push run is the post-merge verification.
+# PRs carry the merge gate; the push trigger is restricted to main (post-merge
+# verification — full posture only) and milestone tags (always the full matrix).
+# `labeled` is in the PR types so adding `full-ci` re-triggers the run;
+# `workflow_dispatch` is the on-demand full run.
 on:
   push:
     branches: [main]
+    tags: ['M*', 'v*']
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  workflow_dispatch:
 
-# Rapid pushes to the same ref cancel the superseded run.
+# Rapid pushes to the same ref cancel the superseded run. event_name is in the
+# key so a dispatched full run isn't cancelled by an unrelated push run.
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # The always-real, always-cheap merge gate. ONE consolidated job on purpose:
+  # split into four jobs, the same ~90s of work bills four runners' checkout +
+  # setup time. Runs per PR in light+full; on main pushes only in full;
+  # always on dispatch / tags / a `full-ci` label.
+  static-gates:
+    name: static gates
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.ref, 'refs/tags/') ||
+      (github.event_name == 'pull_request' &&
+       contains(github.event.pull_request.labels.*.name, 'full-ci')) ||
+      (vars.CI_POSTURE != 'manual' &&
+       (github.event_name == 'pull_request' || vars.CI_POSTURE == 'full'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0   # the hygiene step diffs against the PR base
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.x" }
+
+      # Keeps the knowledge library honest on every run. The audit scripts exit
+      # non-zero on any unresolved citation / failed routing case / broken link,
+      # so this step genuinely blocks merge — it is not decorative.
+      - name: Library audits (refs / routing / links)
+        working-directory: textbooks
+        env: { PYTHONIOENCODING: utf-8, PYTHONUTF8: "1" }
+        run: |
+          python tools/_gen_sections.py
+          # The COMMITTED index is what agents grep to verify citations — a heading
+          # edit merged without regenerating it would poison every later lookup.
+          git diff --exit-code -- SECTIONS.json || { echo "::error::SECTIONS.json is stale — run tools/_gen_sections.py and commit the result."; exit 1; }
+          python tools/_audit_refs.py
+          python tools/_audit_routing.py
+          python tools/_audit_links.py
+
+      # Keeps the frontier research layer honest: MANIFEST routing complete,
+      # every tiered claim carries a real URL + accessed date, reports have
+      # their required sections, every figure/relative link resolves.
+      # (URL liveness is NOT checked here — run `--live` locally; the web is
+      # too flaky to gate merges on.)
+      - name: Research audit (citations / structure / links)
+        working-directory: research
+        env: { PYTHONIOENCODING: utf-8, PYTHONUTF8: "1" }
+        run: python tools/_audit_research.py
+
+      # Skills load ONLY as .claude/skills/<name>/SKILL.md directories — a flat
+      # .md file in skills/ silently fails to load (the layer becomes inert docs).
+      - name: Skills are directories
+        run: |
+          flat=$(find .claude/skills -maxdepth 1 -name '*.md' ! -name 'README.md' 2>/dev/null || true)
+          if [ -n "$flat" ]; then
+            echo "$flat"
+            echo "::error::Flat skill file(s) under .claude/skills/ — Agent Skills load only from <name>/SKILL.md directories. git mv each to <name>/SKILL.md."
+            exit 1
+          fi
+          echo "Skills structure OK."
+
+      # Tracker hygiene: added code must not contain a naked TODO/FIXME — every
+      # deferral carries a filed ticket, written as TODO(#NN). Docs (*.md),
+      # .github/, textbooks/ and .claude/ are exempt (they *talk about* TODOs —
+      # .claude holds the very hook that enforces this rule and the settings
+      # $comment that documents it; its only non-doc files are that machinery).
+      # scripts/preflight.{sh,ps1} are exempt while they are TODO-placeholder
+      # templates; configure_project replaces their stage bodies with real
+      # commands — drop the two exemptions then.
+      # The sed strips ticketed TODO(#NN)/FIXME(#NN) forms first, so EVERY
+      # remaining occurrence is naked — a `(#NN)` elsewhere on the line no
+      # longer whitewashes one. (sed+grep, not grep -P: PCRE dies on
+      # non-UTF-8 locales, e.g. git-bash on Windows.)
+      # Mirrored by the `todo hygiene` stage in scripts/preflight.{sh,ps1}.
+      - name: No naked TODO/FIXME in added lines
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin "${{ github.base_ref }}" --quiet
+          naked=$(git diff "origin/${{ github.base_ref }}...HEAD" -- . ':!*.md' ':!.github' ':!textbooks' \
+            ':!scripts/preflight.sh' ':!scripts/preflight.ps1' ':!.claude' \
+            | grep -E '^\+' | grep -vE '^\+\+\+' \
+            | sed -E 's/(todo|fixme)\(#[0-9]+\)//gI' | grep -iE '\b(todo|fixme)\b' || true)
+          if [ -n "$naked" ]; then
+            echo "$naked"
+            echo "::error::Naked TODO/FIXME in the diff — file a ticket first and annotate as TODO(#NN). See PROJECT_CONVENTIONS.md, Tracker & Hygiene."
+            exit 1
+          fi
+          echo "No naked TODOs."
+
+  # ── Heavy jobs — full posture, or on demand (`full-ci` label / dispatch / tag) ──
+
   build-test:
     name: build & test (${{ matrix.os }})
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.ref, 'refs/tags/') ||
+      vars.CI_POSTURE == 'full' ||
+      (github.event_name == 'pull_request' &&
+       contains(github.event.pull_request.labels.*.name, 'full-ci'))
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]   # trim to the platforms you actually ship
+        # Trim to the platforms you actually ship — Windows bills ~1.7× Linux.
+        os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
@@ -53,6 +179,12 @@ jobs:
 
   lint:
     name: format & lint
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.ref, 'refs/tags/') ||
+      vars.CI_POSTURE == 'full' ||
+      (github.event_name == 'pull_request' &&
+       contains(github.event.pull_request.labels.*.name, 'full-ci'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -68,94 +200,3 @@ jobs:
       # into scripts/preflight.{sh,ps1} if you enable it.
       # - name: Docs (warnings as errors)
       #   run: 'echo "SKIP (unconfigured): docs build command"'
-
-  # Keeps the knowledge library honest on every push. The audit scripts exit
-  # non-zero on any unresolved citation / failed routing case / broken link,
-  # so this job genuinely blocks merge — it is not decorative.
-  library-audits:
-    name: library audits
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with: { python-version: "3.x" }
-      - name: Audit textbooks (refs / routing / links)
-        working-directory: textbooks
-        env: { PYTHONIOENCODING: utf-8, PYTHONUTF8: "1" }
-        run: |
-          python tools/_gen_sections.py
-          # The COMMITTED index is what agents grep to verify citations — a heading
-          # edit merged without regenerating it would poison every later lookup.
-          git diff --exit-code -- SECTIONS.json || { echo "::error::SECTIONS.json is stale — run tools/_gen_sections.py and commit the result."; exit 1; }
-          python tools/_audit_refs.py
-          python tools/_audit_routing.py
-          python tools/_audit_links.py
-
-  # Keeps the frontier research layer honest: MANIFEST routing complete, every
-  # tiered claim carries a real URL + accessed date, reports have their required
-  # sections, every figure/relative link resolves. Exits non-zero; blocks merge.
-  # (URL liveness is NOT checked here — run `--live` locally; the web is too
-  # flaky to gate merges on.)
-  research-audits:
-    name: research audits
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
-        with: { python-version: "3.x" }
-      - name: Audit research layer (citations / structure / links)
-        working-directory: research
-        env: { PYTHONIOENCODING: utf-8, PYTHONUTF8: "1" }
-        run: python tools/_audit_research.py
-
-  # Skills load ONLY as .claude/skills/<name>/SKILL.md directories — a flat
-  # .md file in skills/ silently fails to load (the layer becomes inert docs).
-  skills-structure:
-    name: skills are directories
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: No flat skill files
-        run: |
-          flat=$(find .claude/skills -maxdepth 1 -name '*.md' ! -name 'README.md' 2>/dev/null || true)
-          if [ -n "$flat" ]; then
-            echo "$flat"
-            echo "::error::Flat skill file(s) under .claude/skills/ — Agent Skills load only from <name>/SKILL.md directories. git mv each to <name>/SKILL.md."
-            exit 1
-          fi
-          echo "Skills structure OK."
-
-  # Tracker hygiene: added code must not contain a naked TODO/FIXME — every
-  # deferral carries a filed ticket, written as TODO(#NN). Docs (*.md),
-  # .github/, textbooks/ and .claude/ are exempt (they *talk about* TODOs —
-  # .claude holds the very hook that enforces this rule and the settings
-  # $comment that documents it; its only non-doc files are that machinery).
-  hygiene:
-    name: hygiene (no naked TODOs)
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - name: No naked TODO/FIXME in added lines
-        # scripts/preflight.{sh,ps1} are exempt while they are TODO-placeholder
-        # templates; configure_project replaces their stage bodies with real
-        # commands — drop the two exemptions then.
-        # The sed strips ticketed TODO(#NN)/FIXME(#NN) forms first, so EVERY
-        # remaining occurrence is naked — a `(#NN)` elsewhere on the line no
-        # longer whitewashes one. (sed+grep, not grep -P: PCRE dies on
-        # non-UTF-8 locales, e.g. git-bash on Windows.)
-        # Mirrored by the `todo hygiene` stage in scripts/preflight.{sh,ps1}.
-        run: |
-          git fetch origin "${{ github.base_ref }}" --quiet
-          naked=$(git diff "origin/${{ github.base_ref }}...HEAD" -- . ':!*.md' ':!.github' ':!textbooks' \
-            ':!scripts/preflight.sh' ':!scripts/preflight.ps1' ':!.claude' \
-            | grep -E '^\+' | grep -vE '^\+\+\+' \
-            | sed -E 's/(todo|fixme)\(#[0-9]+\)//gI' | grep -iE '\b(todo|fixme)\b' || true)
-          if [ -n "$naked" ]; then
-            echo "$naked"
-            echo "::error::Naked TODO/FIXME in the diff — file a ticket first and annotate as TODO(#NN). See PROJECT_CONVENTIONS.md, Tracker & Hygiene."
-            exit 1
-          fi
-          echo "No naked TODOs."

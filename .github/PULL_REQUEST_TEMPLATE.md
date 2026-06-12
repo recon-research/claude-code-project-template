@@ -15,7 +15,7 @@
 
 ## Tracker hygiene
 
-- [ ] No naked TODO/FIXME introduced — `TODO(#NN)` only (CI hygiene job enforces)
+- [ ] No naked TODO/FIXME introduced — `TODO(#NN)` only (the `static gates` hygiene step enforces)
 - [ ] Deferred work filed as issues: <#… / none>
 - [ ] Decisions touched: <D-NN recorded in ARCHITECTURE Appendix A / none>
 - [ ] Provisional work declared: <`Provisional on #NN` if this builds on an unratified default — the overrule path greps for this / none>
