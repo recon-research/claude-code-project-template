@@ -24,7 +24,7 @@
 
 ## Source of truth — docs are caches
 
-Truth order: **git/CI &gt; issue tracker &gt; docs &gt; chat memory.** On any mismatch, fix the doc to match reality *before* working — cheap now, poisonous later. Two carve-outs: **ARCHITECTURE invariants / `D-NN` rows are commitments, not caches** — code contradicting one is a defect or a supersede-candidate (file `bug` or `decision`; never edit the log to match drift); and **before `origin` exists, `PROJECT_BACKLOG.md` plays the tracker's role** (see its header). Ownership (who updates what, when):
+Truth order: **git/CI &gt; issue tracker &gt; docs &gt; chat memory.** On any mismatch, fix the doc to match reality *before* working — cheap now, poisonous later. **Single-home each fact** — policy here, project mechanics/config in `PROJECT_CONVENTIONS.md`, procedure in the owning skill, operating reference in `docs/`; every other mention is a one-line cross-link, never a second copy (a fact written twice drifts — `README.md` › the single-home rule). Two carve-outs: **ARCHITECTURE invariants / `D-NN` rows are commitments, not caches** — code contradicting one is a defect or a supersede-candidate (file `bug` or `decision`; never edit the log to match drift); and **before `origin` exists, `PROJECT_BACKLOG.md` plays the tracker's role** (see its header). Ownership (who updates what, when):
 
 | Artifact | When it's written |
 |---|---|
