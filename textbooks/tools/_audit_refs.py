@@ -1,4 +1,4 @@
-import re, glob, os, json, collections
+import re, glob, os, json
 os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # cwd-independent: data lives beside tools/
 M = json.load(open("MANIFEST.json", encoding="utf-8"))
 DOCNAMES = sorted({d["id"].upper() for d in M["reference_docs"]}, key=len, reverse=True)

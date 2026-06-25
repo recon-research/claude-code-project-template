@@ -23,6 +23,7 @@ Drop-in procedures Claude Code follows when invoked (or when a request matches a
 | [plan_milestone_tickets](plan_milestone_tickets/SKILL.md) | Milestone start — refine the epic into grounded, dependency-ordered slice tickets (the horizon rule). |
 | [review_against_library](review_against_library/SKILL.md) | "audit this design vs the library" — cited Must-fix/Consider; `--fix` applies mechanical fixes. |
 | [adversarial_review](adversarial_review/SKILL.md) | Before merge on a substantial change — N independent reviewers prompted to falsify claims. |
+| [audit_over_engineering](audit_over_engineering/SKILL.md) | "what can we delete" / "bloat audit" — whole-repo simplification sweep; files `debt` tickets, never deletes (the repo-wide complement to adversarial_review's per-diff lens). |
 
 ## Frontier research
 
