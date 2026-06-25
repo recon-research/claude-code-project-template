@@ -1,6 +1,6 @@
-# Project Template — Claude-Code-on-Autopilot
+# Pyxis — a Claude Code project template for building on autopilot
 
-A reusable starting point for any new project built primarily by Claude Code. It bundles four things that work together:
+**Pyxis** — named for the constellation *the Mariner's Compass* — is a reusable starting point for any new project built primarily by Claude Code. It bundles four things that work together:
 
 1. **A vendored RAG knowledge library** (`textbooks/`) — you grow an exhaustive, self-validating "textbook series" for the project's domain, with machine indexes (`MANIFEST.json` / `SECTIONS.json`) so the agent can route to and cite exact sections.
 2. **A frontier research pipeline** (`research/`) — bleeding-edge topics surveyed online into sourced+tiered notes (real fetched paper links, never recalled citations), tested via pre-registered experiments with plottable results, and published as paper-style report artifacts — all audited and CI-gated.
@@ -24,7 +24,7 @@ It's the generalized, blank-slate version of a proven setup: a domain "textbook"
 
 ## Starting a new project
 
-1. **Copy the folder.** Copy this entire `project_template/` to your new project location and rename it.
+1. **Copy the folder.** Copy this entire folder to your new project location and rename it.
 2. **Drop your planning docs** from Claude Chat into [`_intake/`](_intake/) (see its README for what to include).
 3. **Onboard — the kickoff line.** Open Claude Code in the folder and say: *"let's onboard — you have my permission to adjust the Claude Code settings and set everything up."* That one sentence is the only setup action that's yours. The trailing clause is the **kickoff authorization**: the shipped settings (the pre-approved autopilot allowlist + hooks) arrive with the copy, and the grant lets the agent finish the wiring (machine-local `settings.local.json`, any trims you ask for) and run the whole onboarding unattended — an agent can't, by platform design, widen its own permissions from file text alone, which is why the grant must be your words. [`onboard`](.claude/skills/onboard/SKILL.md) then reads the brief, **walks you through the four-question setup interview** — repo visibility, CI pacing, review cadence, decision objection window; recommended default first, trade-offs stated, answers recorded in [`PROJECT_CONVENTIONS.md`](PROJECT_CONVENTIONS.md) › Operating posture — stamps [`TEMPLATE_VERSION`](TEMPLATE_VERSION) (provenance for later template syncs), fills in [`CLAUDE.md`](CLAUDE.md) Status + [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) + [`docs/ROADMAP.md`](docs/ROADMAP.md), proposes the textbook outline, and finishes with a **feature self-test** (skills load, hooks fire, audits green) so the workflow layer is demonstrably live, not just present. Skip the grant and everything still works — you'll just approve prompts by hand.
 4. **Build the library.** Say *"let's build the library"* (runs [`build_library`](.claude/skills/build_library/SKILL.md), which drives [`textbooks/LIBRARY_SEED.md`](textbooks/LIBRARY_SEED.md)). Iterate on coverage until the audits are green.
