@@ -18,7 +18,7 @@ Reports and notes **ground `D-NN` decisions** exactly like book sections do — 
 ## The discipline (audited — these are not suggestions)
 
 1. **Fetched, or not cited.** Every present-tense claim carries `(source: <URL>, accessed YYYY-MM-DD)` **on the same line**. A model's training knowledge is stale by definition on frontier topics — claims come from pages actually fetched this session, never from recall. No consulted source → no claim.
-2. **Every claim is tiered**: `[production-proven]` (shipped in a real product) · `[published]` (peer-reviewed paper / official docs / release notes) · `[experimental]` (preprint, proposal, community project). Don't launder experimental into proven. *(The tier tag is also the enforcement hook: the audit mechanically checks source + accessed-date on every tier-tagged line — an untagged claim escapes the gate, so tag everything that asserts.)*
+2. **Every claim is tiered**: `[production-proven]` (shipped in a real product) · `[published]` (peer-reviewed paper / official docs / release notes) · `[experimental]` (preprint, proposal, community project). Don't launder experimental into proven. *(The tier tag is also the enforcement hook: the audit mechanically checks source + accessed-date on every tier-tagged line. An untagged claim would otherwise escape the gate — so the audit also **warns** (warn-only, never fails) on the lowest-noise slice of that gap: a bare **quantitative** claim — a percentage or an `N×` multiplier — that carries neither a tier tag nor a source. That backstop is deliberately narrow; prose claims stay the tag-everything-that-asserts discipline plus review. A noisy gate trains the agent to ignore gates, so the heuristic stays conservative by design.)*
 3. **Notes stale.** Every note carries `> reviewed: YYYY-MM-DD` and goes stale **~180 days** later: re-verify load-bearing claims (and bump the date) before planning against it. The audit warns on stale notes (`--strict-staleness` to fail).
 4. **Different trust models stay distinguishable.** Cite this layer as `research/notes/<file>.md` / `EXP-NN` / `RR-NN` — **never as a `Book NN §X`**. Plans, tickets, and PRs must show which library a claim came from.
 5. **Project-relative, not encyclopedic.** Every note ends with a feasibility path tied to this project's actual constraints, candidate experiments, and a Watch list (what to re-check, where, roughly when).
@@ -40,7 +40,7 @@ Reports and notes **ground `D-NN` decisions** exactly like book sections do — 
 Run `python tools/_audit_research.py` from this directory (CI does, on every push):
 
 - `MANIFEST.json` is valid; every entry's path exists; every on-disk note/experiment/report is routed in the MANIFEST.
-- Every note has a `reviewed:` date; every **tiered claim line** carries an inline `(source: https://…)` **and** an `accessed YYYY-MM-DD`.
+- Every note has a `reviewed:` date; every **tiered claim line** carries an inline `(source: https://…)` **and** an `accessed YYYY-MM-DD`. Untagged **quantitative** claims (a percentage / `N×` with no tier *and* no source) **warn** — a narrow, low-noise backstop for the gap where an untagged claim would skip the source gate; prose claims remain the discipline-plus-review boundary.
 - Every report has its required sections (`## References`, `## Reproducibility`, …); every reference entry carries a URL.
 - Every experiment has `EXPERIMENT.md` with the pre-registration sections.
 - Every relative link / figure path in this layer resolves on disk.

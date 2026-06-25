@@ -43,6 +43,17 @@ for p in (sorted(glob.glob("notes/*.md")) + sorted(glob.glob("reports/RR-*.md"))
 TIER = re.compile(r"\[(production-proven|published|experimental)\]")
 SRC = re.compile(r"\(sources?:\s*<?https?://")
 ACC = re.compile(r"accessed \d{4}-\d{2}-\d{2}")
+# Untagged-claim backstop (#5, warn-only): the tier tag is the enforcement hook,
+# so an UNtagged quantitative claim escapes the source gate entirely. This catches
+# the lowest-noise, highest-value slice of that gap — bare percentages and N×
+# multipliers (47%, 2.5x, ×3), which are almost always empirical and rarely
+# incidental in prose. A line is flagged only when it carries NEITHER a tier tag
+# NOR a source: sourced-but-untiered lines stay traceable, and prose claims remain
+# the tag-discipline-plus-review boundary (README discipline 1-2). Warn, never fail
+# — a noisy gate trains the agent to ignore gates.
+QUANT = re.compile(r"\d+(?:\.\d+)?\s?%"
+                   r"|\d+(?:\.\d+)?\s?[xX×](?![A-Za-z0-9])"      # 2.5x  3×  (not 1920x1080, not 2xy)
+                   r"|(?<![A-Za-z0-9])[xX×]\s?\d+(?:\.\d+)?")    # x2
 REV = re.compile(r"^>\s*reviewed:\s*(\d{4}-\d{2}-\d{2})", re.M)
 LINK = re.compile(r"\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 CODE_SPAN = re.compile(r"`[^`]*`")
@@ -86,11 +97,16 @@ for p in sorted(glob.glob("notes/*.md")):
         except ValueError:
             errs.append(f"{p}: unparseable reviewed date {m.group(1)!r}")
     for i, line in fenced_lines(lines):
-        if TIER.search(CODE_SPAN.sub("", line)):   # a `[published]` mention inside inline code is not a claim
+        stripped = CODE_SPAN.sub("", line)   # a `[published]` / `2x` inside inline code is not a claim
+        if TIER.search(stripped):
             if not SRC.search(line):
                 errs.append(f"{p}:{i}: tiered claim without inline '(source: https://...)' on the same line")
             if not ACC.search(line):
                 errs.append(f"{p}:{i}: tiered claim without 'accessed YYYY-MM-DD'")
+        elif (q := QUANT.search(stripped)) and not SRC.search(line) \
+                and not stripped.lstrip().startswith(("#", ">")):
+            warns.append(f"{p}:{i}: quantitative claim {q.group(0).strip()!r} with no tier tag or source "
+                         f"-- tag it `[tier]` + (source: URL, accessed YYYY-MM-DD), or rephrase (heuristic, warn-only)")
     scan_links(p, lines)
 
 # --- reports: required sections; reference entries carry URLs ---
