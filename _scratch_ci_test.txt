@@ -1,1 +1,2 @@
 scratch non-doc file to trip the classifier (code=true). not merged.
+second line (still a non-doc file, code=true). advisory should skip heavy ON THE PR.
