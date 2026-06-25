@@ -8,25 +8,44 @@
 # ── CI posture — minutes-aware pacing (docs/AUTOMATION.md §6) ────────────────
 # Private repos draw Actions minutes from the plan's monthly pool (Free 2,000 /
 # Pro 3,000; Windows bills ~1.7× Linux) — an autopilot loop running everything on
-# every push empties that in days. Pacing is controlled by ONE repo variable:
+# every push empties that in days. Two repo variables tune CI independently:
 #
 #   gh variable set CI_POSTURE --body <light|full|manual>      (unset = light)
+#   gh variable set CI_GATING  --body <blocking|advisory>      (unset = blocking)
 #
+# CI_POSTURE — how MUCH runs:
 #   light  (default) — only `static gates` runs, per PR (~1 min: library/research
-#          audits, skills structure, TODO hygiene). Heavy jobs run on demand.
-#   full   — everything on every PR + main push. For public repos (minutes are
-#          free there), paid pools, or self-hosted runners.
+#          audits, skills structure, TODO hygiene). The heavy matrix runs on demand.
+#   full   — the heavy build/test/lint matrix too. For public repos (minutes free),
+#          paid pools, or a self-hosted runner.
 #   manual — nothing automatic; escalation paths only. A clean local preflight
 #          pasted into the PR is the merge gate.
 #
-# Escalation in ANY posture: label a PR `full-ci` (heavy matrix for that PR) ·
-# `gh workflow run ci.yml` (one full run) · push an `M*`/`v*` milestone tag.
+# CI_GATING — WHEN the heavy matrix runs (only meaningful in `full`; in `light` the
+# matrix is already on-demand):
+#   blocking (default) — heavy runs ON THE PR and must be green to merge.
+#   advisory — heavy does NOT run on PRs; it runs POST-MERGE on the main push as a
+#          sanity check. The PR merges on `static gates` + the local preflight (which
+#          runs the SAME heavy gates locally — so this defers re-running already-passed
+#          tests, it does not skip testing). A red post-merge run is caught by the next
+#          onboard, which files a `bug` and fixes forward — cheap, because preflight
+#          already covered the heavy gates, so a post-merge red is the rare
+#          environment-specific case. Require only `static gates` in branch protection.
 #
-# Posture gating is job-level `if:` ON PURPOSE: a job skipped by its conditional
-# reports "Success" and SATISFIES required status checks, while workflow-level
-# path/branch filters leave required checks "Pending" and block the PR forever.
-# Don't "simplify" these conditions into `on:` filters. In light posture make
-# `static gates` the only required check (docs/AUTOMATION.md §6).
+# PATH MODULARITY (always on): a doc-only change — every changed file is *.md, or
+# under docs/ or _intake/ — never triggers the heavy matrix, in any posture. This is
+# the "15 minutes of full CI just to edit the roadmap" tax, gone. The `changes` job
+# classifies; the heavy jobs gate on its output. (`static gates` still runs on docs —
+# it checks links, citations, SECTIONS freshness, and hygiene.)
+#
+# Escalation in ANY posture: label a PR `full-ci` (heavy matrix for that PR, even on
+# docs) · `gh workflow run ci.yml` (one full run) · push an `M*`/`v*` milestone tag.
+#
+# Gating is job-level `if:` ON PURPOSE: a job skipped by its conditional reports
+# "Success" and SATISFIES required status checks, while workflow-level path/branch
+# filters leave required checks "Pending" and block the PR forever. Don't "simplify"
+# these into `on:` filters. Require only the checks a given posture actually runs
+# (light/advisory → `static gates`; docs/AUTOMATION.md §5–6).
 #
 # scripts/preflight.{sh,ps1} always runs EVERY gate locally regardless of posture
 # — pacing changes when CI re-verifies, never what must pass. Keep the commands
@@ -34,9 +53,9 @@
 name: CI
 
 # PRs carry the merge gate; the push trigger is restricted to main (post-merge
-# verification — full posture only) and milestone tags (always the full matrix).
-# `labeled` is in the PR types so adding `full-ci` re-triggers the run;
-# `workflow_dispatch` is the on-demand full run.
+# verification — full posture, and the advisory sanity run) and milestone tags
+# (always the full matrix). `labeled` is in the PR types so adding `full-ci`
+# re-triggers the run; `workflow_dispatch` is the on-demand full run.
 on:
   push:
     branches: [main]
@@ -52,10 +71,64 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Path classifier for modularity: is any non-doc file in this change? Its output
+  # gates the heavy matrix so doc-only changes skip it. Cheap (~10s). It runs only
+  # when the heavy matrix could need it (full posture, or an explicit escalation) —
+  # so in light/manual it's skipped too. That guarantee matters: every condition that
+  # can make a heavy job's `if:` true also makes this job's `if:` true, so the heavy
+  # jobs' `needs: changes` never resolves to a skipped dependency.
+  changes:
+    name: classify changes
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.ref, 'refs/tags/') ||
+      vars.CI_POSTURE == 'full' ||
+      (github.event_name == 'pull_request' &&
+       contains(github.event.pull_request.labels.*.name, 'full-ci'))
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.classify.outputs.code }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: classify
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          # Hand-rolled (no third-party action) and FAIL-SAFE: code starts true, so
+          # any error or empty signal runs the matrix rather than skipping it on a
+          # bad read. code=false only when a non-empty file list is wholly doc-only.
+          set +e
+          case "$REF" in refs/tags/*) echo "code=true" >> "$GITHUB_OUTPUT"; echo "tag -> code=true"; exit 0 ;; esac
+          if [ "$EVENT" = "workflow_dispatch" ]; then echo "code=true" >> "$GITHUB_OUTPUT"; echo "dispatch -> code=true"; exit 0; fi
+          if [ "$EVENT" = "pull_request" ]; then
+            git fetch origin "$BASE_REF" --quiet
+            range="origin/$BASE_REF...HEAD"
+          else
+            case "$BEFORE" in ""|0000000000000000000000000000000000000000) range="HEAD^...HEAD" ;; *) range="$BEFORE...HEAD" ;; esac
+          fi
+          changed=$(git diff --name-only $range 2>/dev/null)
+          [ -z "$changed" ] && changed=$(git diff --name-only HEAD^...HEAD 2>/dev/null)
+          echo "changed files:"; echo "$changed"
+          # ERE, not PCRE (-P dies on non-UTF-8 locales). A line surviving both
+          # inverted greps is a non-blank, non-doc path -> real code changed.
+          code=true
+          if [ -n "$changed" ]; then
+            noncode=$(echo "$changed" | grep -vE '^$' | grep -vE '(\.md$|^docs/|^_intake/)')
+            [ -z "$noncode" ] && code=false
+          fi
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "doc-only change? -> code=$code (false = heavy matrix skipped)"
+
   # The always-real, always-cheap merge gate. ONE consolidated job on purpose:
   # split into four jobs, the same ~90s of work bills four runners' checkout +
   # setup time. Runs per PR in light+full; on main pushes only in full;
-  # always on dispatch / tags / a `full-ci` label.
+  # always on dispatch / tags / a `full-ci` label. Stays BLOCKING even under
+  # advisory gating — it is the fast honesty layer; only the heavy matrix defers.
   static-gates:
     name: static gates
     if: >-
@@ -138,16 +211,23 @@ jobs:
           fi
           echo "No naked TODOs."
 
-  # ── Heavy jobs — full posture, or on demand (`full-ci` label / dispatch / tag) ──
-
+  # ── Heavy jobs — full posture (blocking on PRs / advisory post-merge on main),
+  #    or on demand (`full-ci` label / dispatch / tag). Skipped for doc-only changes
+  #    via `needs: changes`. The `if:` reads: run when explicitly escalated, OR when
+  #    real code changed AND posture is full AND (it's the main push, OR it's a PR
+  #    and gating is blocking). Advisory therefore runs the matrix only post-merge.
   build-test:
     name: build & test (${{ matrix.os }})
+    needs: changes
     if: >-
       github.event_name == 'workflow_dispatch' ||
       startsWith(github.ref, 'refs/tags/') ||
-      vars.CI_POSTURE == 'full' ||
       (github.event_name == 'pull_request' &&
-       contains(github.event.pull_request.labels.*.name, 'full-ci'))
+       contains(github.event.pull_request.labels.*.name, 'full-ci')) ||
+      (needs.changes.outputs.code == 'true' &&
+       vars.CI_POSTURE == 'full' &&
+       (github.event_name == 'push' ||
+        (github.event_name == 'pull_request' && vars.CI_GATING != 'advisory')))
     strategy:
       fail-fast: false
       matrix:
@@ -179,12 +259,16 @@ jobs:
 
   lint:
     name: format & lint
+    needs: changes
     if: >-
       github.event_name == 'workflow_dispatch' ||
       startsWith(github.ref, 'refs/tags/') ||
-      vars.CI_POSTURE == 'full' ||
       (github.event_name == 'pull_request' &&
-       contains(github.event.pull_request.labels.*.name, 'full-ci'))
+       contains(github.event.pull_request.labels.*.name, 'full-ci')) ||
+      (needs.changes.outputs.code == 'true' &&
+       vars.CI_POSTURE == 'full' &&
+       (github.event_name == 'push' ||
+        (github.event_name == 'pull_request' && vars.CI_GATING != 'advisory')))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
