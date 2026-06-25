@@ -1,3 +1,9 @@
+# The template's own machinery is Python (textbooks/research audits, .claude/hooks,
+# scripts/preflight + metrics) — its bytecode generates from day one, independent of
+# the downstream project's stack. Ignore it unconditionally.
+__pycache__/
+*.pyc
+
 # --- Add your stack's build artifacts here during onboarding ---
 # Examples (uncomment / adapt to your toolchain):
 # /target            # Rust
