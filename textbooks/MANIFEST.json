@@ -68,7 +68,8 @@
     { "path": "../.claude/skills/research_topic/SKILL.md", "triggers": ["research", "state of the art", "survey papers", "bleeding edge"], "description": "Survey a frontier topic online into a sourced + tiered research note (real fetched links only)." },
     { "path": "../.claude/skills/run_experiment/SKILL.md", "triggers": ["run an experiment", "test the theory", "benchmark", "implement the paper"], "description": "Pre-registered, reproducible experiment with comparable, plottable results (EXP-NN)." },
     { "path": "../.claude/skills/write_research_report/SKILL.md", "triggers": ["research report", "write up the experiment", "paper artifact", "whitepaper"], "description": "Markdown-first paper artifact (RR-NN) with real-link references and regenerable figures." },
-    { "path": "../.claude/skills/retrospective/SKILL.md", "triggers": ["retrospective", "retro", "root-cause analysis", "post-mortem", "why do bugs keep escaping"], "description": "CMMI-L5 defect-prevention pass: mine escaped defects + metrics, root-cause, leave a guard (gate/anti-pattern/lens) not just a fix." }
+    { "path": "../.claude/skills/retrospective/SKILL.md", "triggers": ["retrospective", "retro", "root-cause analysis", "post-mortem", "why do bugs keep escaping"], "description": "CMMI-L5 defect-prevention pass: mine escaped defects + metrics, root-cause, leave a guard (gate/anti-pattern/lens) not just a fix." },
+    { "path": "../.claude/skills/audit_over_engineering/SKILL.md", "triggers": ["audit over-engineering", "what can we delete", "find dead code", "bloat audit", "simplification sweep", "is this over-engineered"], "description": "Whole-repo over-engineering sweep (delete/stdlib/native/yagni/shrink), biggest-cut-first ledger + net tally; files debt tickets, never deletes. Complements adversarial_review's per-diff lens." }
   ],
   "rag_hints": {
     "for_authoring_a_new_book": ["book_00"],
