@@ -1,9 +1,12 @@
 ---
 name: update_from_template
 description: Pull upstream project_template improvements into a project that was copied from it. Use when the user says "update from the template", "sync the template", "the template changed", or "pull template improvements". Reads TEMPLATE_VERSION, diffs upstream since the stamped sha, applies machinery wholesale, ports content-file improvements by hand, re-verifies everything, and re-stamps.
+disable-model-invocation: true
 ---
 
 # Update From Template
+
+> **Invocation:** this skill sets `disable-model-invocation: true` — a deliberate command you run explicitly (`/update_from_template`), never auto-routed from plain English. It's the worked example for the skill-listing token convention in [`.claude/skills/README.md`](../README.md) › *Authoring conventions* (resolves #6) — don't strip the flag without reading that note.
 
 The template is two kinds of files — the boundary lives in its README (§ *Machinery vs content*): **machinery** (skills, hooks, agents, audit tools, scripts, CI structure, authoring templates) is taken from upstream wholesale; **content** (the filled-in docs and books) is never overwritten — improvements to its *structure* are ported by hand from the diff. This skill makes the first mechanical and the second explicit.
 
