@@ -57,6 +57,7 @@ Drop-in procedures Claude Code follows when invoked (or when a request matches a
 | Skill | When |
 |-------|------|
 | [track_followups](track_followups/SKILL.md) | Sweep deferred work into the tracker (run inside `prepare_compaction`). |
+| [retrospective](retrospective/SKILL.md) | Milestone exit / a metric trips its alarm — root-cause escaped defects and leave a guard (CMMI-L5; consumes `docs/METRICS.md`). |
 
 ---
 
