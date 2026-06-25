@@ -80,8 +80,10 @@ Many small instruction docs, deliberately. The discipline that keeps "many" from
 | [`PROJECT_CONVENTIONS.md`](PROJECT_CONVENTIONS.md) | **project mechanics + config** — paths, commands, stack, operating posture, tracker/merge rules | when a skill runs (every skill reads it first) |
 | [`.claude/skills/<name>/SKILL.md`](.claude/skills/) | **procedure** — how to perform one task | lazy — only each skill's `description:` is always resident, for routing |
 | [`docs/`](docs/) | **operating reference** — `ARCHITECTURE`, `ROADMAP`, `AUTOMATION`, `METRICS` | lazy, when a task routes there |
-| [`textbooks/CLAUDE.md`](textbooks/CLAUDE.md) · [`AGENT_GUIDE.md`](textbooks/AGENT_GUIDE.md) · [`research/README.md`](research/README.md) | **library / frontier usage** — how to consult + extend each knowledge layer | **directory-scoped** — auto-loads only while working in that folder |
+| [`textbooks/CLAUDE.md`](textbooks/CLAUDE.md) · [`research/CLAUDE.md`](research/CLAUDE.md) (+ [`AGENT_GUIDE.md`](textbooks/AGENT_GUIDE.md) / [`research/README.md`](research/README.md) for the full reference) | **library / frontier discipline** — the citation/tier rules + how to consult each knowledge layer | the `CLAUDE.md` is **directory-scoped** (auto-loads while working in that folder); the guides are lazy |
 | `README.md` (this file) · each folder's `README.md` | **human overview** — for someone browsing the repo | **not loaded** — humans only |
+
+*(`.claude/rules/` path-scoping was evaluated as an alternative for the per-subtree discipline — it's GA, but for a whole subtree it's functionally equivalent to a directory-scoped `CLAUDE.md` on both token cost and post-compaction reload, so the `CLAUDE.md` stays the single mechanism rather than adding a second one — #4.)*
 
 **Two boundaries here are load-bearing — don't "streamline" them away:**
 
