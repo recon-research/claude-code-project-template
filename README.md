@@ -70,6 +70,24 @@ Downstream projects fill some template files in and take others verbatim. The sp
 | **Content** | `CLAUDE.md` · `PROJECT_CONVENTIONS.md` · `docs/` · `textbooks/` books + the filled `CLAUDE`/`README`/`AGENT_GUIDE`/`MANIFEST` · `research/` notes/experiments/reports | Filled once per project, **never overwritten** — structural improvements are ported by hand from the upstream diff, respecting the project's documented deviations. |
 | **Settings** | `.claude/settings.json` | Ships with the copy (adopted via the kickoff authorization). Syncs may update hooks/deny rules; an agent never *widens* the allowlist without the owner's fresh, explicit instruction. |
 
+## The documentation surface — the single-home rule
+
+Many small instruction docs, deliberately. The discipline that keeps "many" from becoming "scattered and contradictory": **each fact lives in exactly one layer; every other mention is a one-line cross-link, never a copy** (a fact written twice drifts). When you add guidance, drop it in its layer and link from the rest:
+
+| Layer — the canonical home | Owns | Loaded into the agent |
+|---|---|---|
+| [`CLAUDE.md`](CLAUDE.md) | **policy** — the autopilot loop, the daily moves, working style, truth hierarchy | **every session** (so keep it lean) |
+| [`PROJECT_CONVENTIONS.md`](PROJECT_CONVENTIONS.md) | **project mechanics + config** — paths, commands, stack, operating posture, tracker/merge rules | when a skill runs (every skill reads it first) |
+| [`.claude/skills/<name>/SKILL.md`](.claude/skills/) | **procedure** — how to perform one task | lazy — only each skill's `description:` is always resident, for routing |
+| [`docs/`](docs/) | **operating reference** — `ARCHITECTURE`, `ROADMAP`, `AUTOMATION`, `METRICS` | lazy, when a task routes there |
+| [`textbooks/CLAUDE.md`](textbooks/CLAUDE.md) · [`AGENT_GUIDE.md`](textbooks/AGENT_GUIDE.md) · [`research/README.md`](research/README.md) | **library / frontier usage** — how to consult + extend each knowledge layer | **directory-scoped** — auto-loads only while working in that folder |
+| `README.md` (this file) · each folder's `README.md` | **human overview** — for someone browsing the repo | **not loaded** — humans only |
+
+**Two boundaries here are load-bearing — don't "streamline" them away:**
+
+- **Lazy-loading *is* the token economy.** Only `CLAUDE.md` rides every session; directory-scoped `CLAUDE.md`s, skill bodies, and `docs/` load on demand. Merging a lazy doc *into* `CLAUDE.md` (or folding the human `README`s into it) would tax every session with text it rarely needs — the opposite of streamlining. The split is the optimization; keep it.
+- **Pinned paths** the loader or skills depend on, which therefore cannot move or merge: root `CLAUDE.md`; each directory's `CLAUDE.md`; `PROJECT_CONVENTIONS.md` (every skill hard-reads this path); `.claude/skills/<name>/SKILL.md` (Agent-Skills load *only* from `<name>/SKILL.md` directories); `.claude/skills/README.md` (the catalog the routing audit checks). Everything else is movable, but is already single-homed — one doc per audience/layer, not duplication.
+
 ## Updating a downstream project
 
 The copy is stamped at onboard (`TEMPLATE_VERSION`: source + sha + date). Later, say **"update from the template"** — [`update_from_template`](.claude/skills/update_from_template/SKILL.md) diffs upstream from the stamped sha, applies machinery wholesale, ports content improvements by diff, re-runs every gate, and re-stamps. Improvements flow the other way too (see *Maintaining this template* below).
